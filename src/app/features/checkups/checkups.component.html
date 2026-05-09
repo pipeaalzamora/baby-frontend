@@ -1,0 +1,288 @@
+<div class="checkups-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Stethoscope SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.5 6.5a4 4 0 0 0 4 4h1a4 4 0 0 1 4 4v1a3 3 0 0 0 6 0v-1"/>
+          <circle cx="19.5" cy="15.5" r="1.5"/>
+          <path d="M4.5 6.5A2.5 2.5 0 0 1 2 4M4.5 6.5A2.5 2.5 0 0 0 7 4"/>
+          <path d="M2 4a2 2 0 0 1 4 0"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Controles Médicos</h1>
+        <p class="page-subtitle">Historial de visitas y seguimiento</p>
+      </div>
+    </div>
+    <button class="btn-new" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo control
+      }
+    </button>
+  </div>
+
+  <!-- Toast success -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showForm()) {
+    <div class="toast toast--error" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Form colapsable -->
+  @if (showForm()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </div>
+        <h2 class="form-card-title">Nuevo control médico</h2>
+      </div>
+
+      @if (error()) {
+        <div class="toast toast--error" role="alert">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <!-- Fecha -->
+        <div class="form-group">
+          <label for="date" class="form-label">Fecha *</label>
+          <input id="date" type="date" class="form-input" [(ngModel)]="form.date" required/>
+        </div>
+
+        <!-- Próxima cita -->
+        <div class="form-group">
+          <label for="nextAppointment" class="form-label">Próxima cita</label>
+          <input id="nextAppointment" type="date" class="form-input" [(ngModel)]="form.nextAppointment"/>
+        </div>
+
+        <!-- Médico -->
+        <div class="form-group">
+          <label for="doctorName" class="form-label">Médico *</label>
+          <input id="doctorName" type="text" class="form-input" [(ngModel)]="form.doctorName"
+                 placeholder="Ej: Dr. García"/>
+        </div>
+
+        <!-- Centro -->
+        <div class="form-group">
+          <label for="center" class="form-label">Centro de salud *</label>
+          <input id="center" type="text" class="form-input" [(ngModel)]="form.center"
+                 placeholder="Ej: CESFAM Los Andes"/>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="form-group form-group--full">
+          <label for="observations" class="form-label">Observaciones</label>
+          <textarea id="observations" class="form-input form-textarea" [(ngModel)]="form.observations"
+                    placeholder="Notas del control, diagnóstico, indicaciones..." rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- Sección recetas -->
+      <div class="prescriptions-section">
+        <div class="prescriptions-header">
+          <h3 class="prescriptions-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+              <path d="M9 12h6M9 16h4"/>
+            </svg>
+            Recetas
+            @if (form.prescriptions.length > 0) {
+              <span class="prescriptions-count">{{ form.prescriptions.length }}</span>
+            }
+          </h3>
+          <button class="btn-add-rx" (click)="addPrescription()" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v10M3 8h10"/>
+            </svg>
+            Agregar
+          </button>
+        </div>
+
+        @if (form.prescriptions.length === 0) {
+          <p class="prescriptions-empty">Sin recetas. Haz clic en "Agregar" para añadir una.</p>
+        } @else {
+          <div class="prescriptions-list">
+            @for (rx of form.prescriptions; track $index; let i = $index) {
+              <div class="rx-row">
+                <div class="rx-fields">
+                  <div class="form-group">
+                    <label [for]="'med-' + i" class="form-label">Medicamento</label>
+                    <input [id]="'med-' + i" type="text" class="form-input" [(ngModel)]="rx.medication"
+                           placeholder="Ej: Paracetamol"/>
+                  </div>
+                  <div class="form-group">
+                    <label [for]="'dos-' + i" class="form-label">Dosis</label>
+                    <input [id]="'dos-' + i" type="text" class="form-input" [(ngModel)]="rx.dosage"
+                           placeholder="Ej: 5ml cada 8h"/>
+                  </div>
+                  <div class="form-group">
+                    <label [for]="'dur-' + i" class="form-label">Duración</label>
+                    <input [id]="'dur-' + i" type="text" class="form-input" [(ngModel)]="rx.duration"
+                           placeholder="Ej: 5 días"/>
+                  </div>
+                </div>
+                <button class="btn-remove-rx" (click)="removePrescription(i)" type="button" aria-label="Eliminar receta">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer del form -->
+      <div class="form-footer">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--primary" (click)="submit()" type="button"
+                [disabled]="saving() || !form.date || !form.doctorName.trim() || !form.center.trim()">
+          @if (saving()) {
+            <span class="spinner-sm"></span>
+            Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Guardar control
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando controles médicos...</p>
+    </div>
+  } @else {
+
+    <!-- Lista de controles -->
+    @if (checkups().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="rgba(14,165,233,0.08)" stroke="#0ea5e9" stroke-width="1.5"/>
+            <path d="M22 32a10 10 0 0 0 10 10h2a10 10 0 0 1 10 10" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="44" cy="42" r="3" stroke="#0ea5e9" stroke-width="2"/>
+            <path d="M22 32a5 5 0 0 1-5-5M22 32a5 5 0 0 0 5-5" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 27a4 4 0 0 1 8 0" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">Sin controles registrados</p>
+        <p class="empty-sub">Registra el primer control médico con el botón "Nuevo control".</p>
+      </div>
+    } @else {
+      <div class="checkups-list">
+        @for (c of checkups(); track c.id; let i = $index) {
+          <div class="checkup-card" [style.animation-delay]="(i * 60) + 'ms'">
+
+            <!-- Card header -->
+            <div class="card-header">
+              <div class="card-date-block">
+                <div class="card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4.5 6.5a4 4 0 0 0 4 4h1a4 4 0 0 1 4 4v1a3 3 0 0 0 6 0v-1"/>
+                    <circle cx="19.5" cy="15.5" r="1.5"/>
+                    <path d="M4.5 6.5A2.5 2.5 0 0 1 2 4M4.5 6.5A2.5 2.5 0 0 0 7 4"/>
+                    <path d="M2 4a2 2 0 0 1 4 0"/>
+                  </svg>
+                </div>
+                <div>
+                  <span class="card-date">{{ c.date | slice:0:10 }}</span>
+                  <span class="card-label">Control médico</span>
+                </div>
+              </div>
+              @if (c.nextAppointment) {
+                <div class="next-appt-badge">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="1.5" y="2" width="11" height="10" rx="1.5"/>
+                    <path d="M4.5 1v2M9.5 1v2M1.5 6h11"/>
+                  </svg>
+                  Próxima: {{ c.nextAppointment | slice:0:10 }}
+                </div>
+              }
+            </div>
+
+            <!-- Card body -->
+            <div class="card-body">
+              <div class="card-info-row">
+                <div class="info-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="8" cy="5" r="3"/>
+                    <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                  </svg>
+                  <span>{{ c.doctorName }}</span>
+                </div>
+                <div class="info-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M8 1.5C5.5 1.5 3.5 3.5 3.5 6c0 3.5 4.5 8.5 4.5 8.5S12.5 9.5 12.5 6c0-2.5-2-4.5-4.5-4.5z"/>
+                    <circle cx="8" cy="6" r="1.5"/>
+                  </svg>
+                  <span>{{ c.center }}</span>
+                </div>
+              </div>
+
+              @if (c.observations) {
+                <p class="card-observations">{{ c.observations }}</p>
+              }
+
+              @if (c.prescriptions && c.prescriptions.length > 0) {
+                <div class="card-prescriptions">
+                  <div class="rx-header">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M6 3H4a1 1 0 00-1 1v9a1 1 0 001 1h8a1 1 0 001-1V4a1 1 0 00-1-1h-2"/>
+                      <rect x="6" y="2" width="4" height="2.5" rx="0.5"/>
+                      <path d="M6 8h4M6 11h2.5"/>
+                    </svg>
+                    <span>Recetas ({{ c.prescriptions.length }})</span>
+                  </div>
+                  <div class="rx-pills">
+                    @for (rx of c.prescriptions; track $index) {
+                      <div class="rx-pill">
+                        <span class="rx-med">{{ rx.medication }}</span>
+                        <span class="rx-detail">{{ rx.dosage }} · {{ rx.duration }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>
