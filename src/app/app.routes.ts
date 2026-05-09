@@ -28,6 +28,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/growth/growth.component').then(m => m.GrowthComponent),
       },
+      {
+        path: 'checkups',
+        loadComponent: () =>
+          import('./features/checkups/checkups.component').then(m => m.CheckupsComponent),
+      },
+      {
+        path: 'nutrition',
+        loadComponent: () =>
+          import('./features/nutrition/nutrition.component').then(m => m.NutritionComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

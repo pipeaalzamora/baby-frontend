@@ -20,8 +20,10 @@ export class ShellComponent {
   logout()        { this.auth.logout(); }
 
   readonly navItems = [
-    { path: '/dashboard', label: 'Dashboard',   icon: 'home',    color: '#0ea5e9' },
-    { path: '/vaccines',  label: 'Vacunas',      icon: 'shield',  color: '#38bdf8' },
-    { path: '/growth',    label: 'Crecimiento',  icon: 'chart',   color: '#7dd3fc' },
+    { path: '/dashboard', label: 'Dashboard',         icon: 'home',        color: '#0ea5e9' },
+    { path: '/vaccines',  label: 'Vacunas',            icon: 'shield',      color: '#38bdf8' },
+    { path: '/growth',    label: 'Crecimiento',        icon: 'chart',       color: '#7dd3fc' },
+    { path: '/checkups',  label: 'Controles Médicos',  icon: 'stethoscope', color: '#0ea5e9' },
+    { path: '/nutrition', label: 'Alimentación',       icon: 'nutrition',   color: '#10b981' },
   ];
 }
