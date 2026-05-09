@@ -1,0 +1,458 @@
+<div class="nutrition-page">
+
+  <!-- ─── Header ─────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+          <path d="M7 2v20"/>
+          <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Alimentación</h1>
+        <p class="page-subtitle">Guía, recetas e introducción de alimentos</p>
+      </div>
+    </div>
+
+    @if (activeTab() === 'recipes') {
+      <button class="btn-add" (click)="toggleRecipeForm()" type="button">
+        @if (showRecipeForm()) {
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+          Cancelar
+        } @else {
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+          </svg>
+          Nueva receta
+        }
+      </button>
+    }
+
+    @if (activeTab() === 'introductions') {
+      <button class="btn-add btn-add--green" (click)="toggleIntroForm()" type="button">
+        @if (showIntroForm()) {
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+          Cancelar
+        } @else {
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+          </svg>
+          Registrar alimento
+        }
+      </button>
+    }
+  </div>
+
+  <!-- ─── Toast ──────────────────────────────────────────────────────────── -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showRecipeForm() && !showIntroForm()) {
+    <div class="toast toast--error" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- ─── Tabs ────────────────────────────────────────────────────────────── -->
+  <div class="tabs-bar" role="tablist">
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'guide'"
+      (click)="setTab('guide')" role="tab" type="button">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+      </svg>
+      Guía por etapas
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'recipes'"
+      (click)="setTab('recipes')" role="tab" type="button">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L13 10.414V17a1 1 0 01-.553.894l-4 2A1 1 0 017 19v-8.586L3.293 6.707A1 1 0 013 6V4z"/>
+      </svg>
+      Recetas
+      @if (recipes().length > 0) {
+        <span class="tab-count">{{ recipes().length }}</span>
+      }
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'introductions'"
+      (click)="setTab('introductions')" role="tab" type="button">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+        <path d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"/>
+      </svg>
+      Introducciones
+      @if (introductions().length > 0) {
+        <span class="tab-count tab-count--green">{{ introductions().length }}</span>
+      }
+    </button>
+    <div class="tab-indicator" [class.tab-indicator--recipes]="activeTab() === 'recipes'" [class.tab-indicator--introductions]="activeTab() === 'introductions'"></div>
+  </div>
+
+  <!-- ─── Loading ─────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando datos...</p>
+    </div>
+  } @else {
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: GUÍA POR ETAPAS                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'guide') {
+      <div class="guide-section">
+        <p class="guide-intro">
+          Referencia rápida sobre qué alimentos introducir en cada etapa del desarrollo de tu bebé.
+          Siempre consulta con tu pediatra antes de iniciar nuevos alimentos.
+        </p>
+        <div class="stage-list">
+          @for (stage of stageGuide; track stage.stage; let i = $index) {
+            <div class="stage-card" [class]="'stage-card--' + stage.stage.replace('+', 'plus')">
+              <div class="stage-card-header">
+                <span class="stage-emoji" aria-hidden="true">{{ stage.icon }}</span>
+                <div class="stage-meta">
+                  <span class="stage-label">{{ stage.label }}</span>
+                  <p class="stage-desc">{{ stage.desc }}</p>
+                </div>
+              </div>
+              <div class="stage-foods">
+                @for (food of stage.foods; track food) {
+                  <span class="food-chip">{{ food }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="guide-tip">
+          <div class="tip-icon">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <p>Introduce un alimento nuevo cada 3-5 días para identificar posibles alergias. Registra las reacciones en la pestaña de Introducciones.</p>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: RECETAS                                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'recipes') {
+
+      <!-- Formulario nueva receta -->
+      @if (showRecipeForm()) {
+        <div class="form-card">
+          <h2 class="form-title">Nueva receta</h2>
+
+          @if (error()) {
+            <div class="toast toast--error">{{ error() }}</div>
+          }
+
+          <div class="form-grid">
+            <div class="form-group form-group--wide">
+              <label for="rName" class="form-label">Nombre de la receta *</label>
+              <input id="rName" type="text" class="form-input" [(ngModel)]="recipeForm.name"
+                placeholder="Ej: Puré de zanahoria con pollo"/>
+            </div>
+            <div class="form-group">
+              <label for="rStage" class="form-label">Etapa *</label>
+              <select id="rStage" class="form-input form-select" [(ngModel)]="recipeForm.stage">
+                <option value="" disabled>Seleccionar etapa</option>
+                @for (s of stageOptions; track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rTexture" class="form-label">Textura</label>
+              <select id="rTexture" class="form-input form-select" [(ngModel)]="recipeForm.texture">
+                <option value="" disabled>Seleccionar textura</option>
+                @for (t of textureOptions; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rTime" class="form-label">Tiempo de prep. (min) *</label>
+              <input id="rTime" type="number" class="form-input" [(ngModel)]="recipeForm.prepTimeMin"
+                placeholder="Ej: 20" min="1" max="240"/>
+            </div>
+          </div>
+
+          <!-- Ingredientes -->
+          <div class="dynamic-section">
+            <div class="dynamic-header">
+              <span class="dynamic-title">Ingredientes</span>
+              <button class="btn-add-item" (click)="addIngredient()" type="button">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 3a1 1 0 011 1v3h3a1 1 0 110 2H9v3a1 1 0 11-2 0V9H4a1 1 0 110-2h3V4a1 1 0 011-1z"/>
+                </svg>
+                Agregar
+              </button>
+            </div>
+            @for (ing of recipeForm.ingredients; track trackByIndex($index); let i = $index) {
+              <div class="ingredient-row">
+                <input type="text" class="form-input" [(ngModel)]="recipeForm.ingredients[i].name"
+                  [id]="'ing-name-' + i" placeholder="Ingrediente" [attr.aria-label]="'Ingrediente ' + (i + 1)"/>
+                <input type="text" class="form-input form-input--sm" [(ngModel)]="recipeForm.ingredients[i].amount"
+                  [id]="'ing-amt-' + i" placeholder="Cantidad" [attr.aria-label]="'Cantidad ingrediente ' + (i + 1)"/>
+                @if (recipeForm.ingredients.length > 1) {
+                  <button class="btn-remove" (click)="removeIngredient(i)" type="button" aria-label="Eliminar ingrediente">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M4.293 4.293a1 1 0 011.414 0L8 6.586l2.293-2.293a1 1 0 111.414 1.414L9.414 8l2.293 2.293a1 1 0 01-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 01-1.414-1.414L6.586 8 4.293 5.707a1 1 0 010-1.414z"/>
+                    </svg>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Pasos -->
+          <div class="dynamic-section">
+            <div class="dynamic-header">
+              <span class="dynamic-title">Pasos de preparación</span>
+              <button class="btn-add-item" (click)="addStep()" type="button">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 3a1 1 0 011 1v3h3a1 1 0 110 2H9v3a1 1 0 11-2 0V9H4a1 1 0 110-2h3V4a1 1 0 011-1z"/>
+                </svg>
+                Agregar paso
+              </button>
+            </div>
+            @for (step of recipeForm.steps; track trackByIndex($index); let i = $index) {
+              <div class="step-row">
+                <span class="step-num">{{ i + 1 }}</span>
+                <input type="text" class="form-input" [(ngModel)]="recipeForm.steps[i]"
+                  [id]="'step-' + i" [placeholder]="'Paso ' + (i + 1)" [attr.aria-label]="'Paso ' + (i + 1)"/>
+                @if (recipeForm.steps.length > 1) {
+                  <button class="btn-remove" (click)="removeStep(i)" type="button" aria-label="Eliminar paso">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M4.293 4.293a1 1 0 011.414 0L8 6.586l2.293-2.293a1 1 0 111.414 1.414L9.414 8l2.293 2.293a1 1 0 01-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 01-1.414-1.414L6.586 8 4.293 5.707a1 1 0 010-1.414z"/>
+                    </svg>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--ghost" (click)="toggleRecipeForm()" type="button">Cancelar</button>
+            <button class="btn btn--confirm" (click)="submitRecipe()" type="button" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-sm"></span> Guardando...
+              } @else {
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8l4 4 6-6"/>
+                </svg>
+                Guardar receta
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Grid de recetas -->
+      @if (recipes().length === 0 && !showRecipeForm()) {
+        <div class="empty-state">
+          <div class="empty-orb">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" fill="rgba(14,165,233,0.08)" stroke="rgba(14,165,233,0.25)" stroke-width="1.5"/>
+              <path d="M20 22h4v20h-4zM30 18h4v24h-4zM40 26h4v16h-4z" fill="rgba(14,165,233,0.3)" rx="2"/>
+              <path d="M20 22h4v20h-4zM30 18h4v24h-4zM40 26h4v16h-4z" stroke="#0ea5e9" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p>Aún no hay recetas guardadas.</p>
+          <button class="btn btn--confirm" (click)="toggleRecipeForm()" type="button">
+            Crear primera receta
+          </button>
+        </div>
+      } @else if (recipes().length > 0) {
+        <div class="recipes-grid">
+          @for (recipe of recipes(); track recipe.id; let i = $index) {
+            <div class="recipe-card" [style.animation-delay]="(i * 40) + 'ms'">
+              <div class="recipe-card-top">
+                <div class="recipe-badges">
+                  <span class="stage-badge">{{ recipe.stage }}</span>
+                  @if (recipe.texture) {
+                    <span class="texture-badge">{{ recipe.texture }}</span>
+                  }
+                </div>
+                <button class="fav-btn" [class.fav-btn--active]="recipe.isFavorite"
+                  (click)="toggleFavorite(recipe)" type="button"
+                  [attr.aria-label]="recipe.isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+                  <svg viewBox="0 0 20 20" [attr.fill]="recipe.isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                </button>
+              </div>
+
+              <h3 class="recipe-name">{{ recipe.name }}</h3>
+
+              <div class="recipe-meta">
+                <span class="recipe-time">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="8" cy="8" r="6"/>
+                    <path d="M8 5v3l2 2"/>
+                  </svg>
+                  {{ recipe.prepTimeMin }} min
+                </span>
+                @if (recipe.ingredients.length > 0) {
+                  <span class="recipe-ing-count">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M2 4h12M2 8h8M2 12h5"/>
+                    </svg>
+                    {{ recipe.ingredients.length }} ingredientes
+                  </span>
+                }
+              </div>
+
+              @if (recipe.allergens.length > 0) {
+                <div class="allergen-row">
+                  @for (a of recipe.allergens | slice:0:3; track a) {
+                    <span class="allergen-chip">{{ a }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: INTRODUCCIONES                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'introductions') {
+
+      <!-- Formulario nueva introducción -->
+      @if (showIntroForm()) {
+        <div class="form-card">
+          <h2 class="form-title">Registrar introducción de alimento</h2>
+
+          @if (error()) {
+            <div class="toast toast--error">{{ error() }}</div>
+          }
+
+          <div class="form-grid">
+            <div class="form-group form-group--wide">
+              <label for="iFoodName" class="form-label">Alimento *</label>
+              <input id="iFoodName" type="text" class="form-input" [(ngModel)]="introForm.foodName"
+                placeholder="Ej: Zanahoria, Pollo, Huevo..."/>
+            </div>
+            <div class="form-group">
+              <label for="iDate" class="form-label">Fecha *</label>
+              <input id="iDate" type="date" class="form-input" [(ngModel)]="introForm.date"/>
+            </div>
+            <div class="form-group">
+              <label for="iReaction" class="form-label">Reacción</label>
+              <select id="iReaction" class="form-input form-select" [(ngModel)]="introForm.reaction">
+                <option value="none">Sin reacción</option>
+                <option value="mild">Leve</option>
+                <option value="moderate">Moderada</option>
+                <option value="severe">Severa</option>
+              </select>
+            </div>
+            <div class="form-group form-group--wide">
+              <label for="iNotes" class="form-label">Notas</label>
+              <input id="iNotes" type="text" class="form-input" [(ngModel)]="introForm.notes"
+                placeholder="Observaciones adicionales..."/>
+            </div>
+          </div>
+
+          <div class="accepted-toggle">
+            <label class="toggle-label" for="iAccepted">
+              <input id="iAccepted" type="checkbox" class="toggle-checkbox" [(ngModel)]="introForm.accepted"/>
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">{{ introForm.accepted ? 'Alimento aceptado' : 'Alimento rechazado' }}</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--ghost" (click)="toggleIntroForm()" type="button">Cancelar</button>
+            <button class="btn btn--confirm-green" (click)="submitIntro()" type="button" [disabled]="saving()">
+              @if (saving()) {
+                <span class="spinner-sm"></span> Guardando...
+              } @else {
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8l4 4 6-6"/>
+                </svg>
+                Guardar
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Lista de introducciones -->
+      @if (introductions().length === 0 && !showIntroForm()) {
+        <div class="empty-state">
+          <div class="empty-orb empty-orb--green">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.25)" stroke-width="1.5"/>
+              <path d="M22 32h20M32 22v20" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="32" cy="32" r="8" stroke="#10b981" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <p>Aún no hay alimentos registrados.</p>
+          <button class="btn btn--confirm-green" (click)="toggleIntroForm()" type="button">
+            Registrar primer alimento
+          </button>
+        </div>
+      } @else if (introductions().length > 0) {
+        <div class="intro-list">
+          @for (intro of introductions(); track intro.id; let i = $index) {
+            <div class="intro-item" [style.animation-delay]="(i * 35) + 'ms'">
+              <div class="intro-left">
+                <div class="intro-accepted-dot" [class.intro-accepted-dot--yes]="intro.accepted" [class.intro-accepted-dot--no]="!intro.accepted">
+                  @if (intro.accepted) {
+                    <svg viewBox="0 0 12 12" fill="currentColor">
+                      <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <path d="M3 3l6 6M9 3l-6 6"/>
+                    </svg>
+                  }
+                </div>
+                <div class="intro-info">
+                  <span class="intro-food-name">{{ intro.foodName }}</span>
+                  <span class="intro-date">{{ intro.date | slice:0:10 }}</span>
+                  @if (intro.notes) {
+                    <span class="intro-notes">{{ intro.notes }}</span>
+                  }
+                </div>
+              </div>
+              <div class="intro-right">
+                <span class="reaction-badge" [class]="'reaction-badge--' + intro.reaction">
+                  {{ reactionLabel(intro.reaction) }}
+                </span>
+                <span class="accepted-label" [class.accepted-label--yes]="intro.accepted" [class.accepted-label--no]="!intro.accepted">
+                  {{ intro.accepted ? 'Aceptado' : 'Rechazado' }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+  }<!-- end @else loading -->
+
+</div>
