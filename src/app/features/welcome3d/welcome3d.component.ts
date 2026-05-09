@@ -150,7 +150,7 @@ export class Welcome3dComponent implements AfterViewInit, OnDestroy {
     const loader = new GLTFLoader();
 
     loader.load(
-      'models/baby.glb',
+      '/models/baby.glb',
       (gltf) => {
         const model = gltf.scene;
 
