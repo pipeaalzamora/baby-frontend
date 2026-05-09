@@ -1,0 +1,211 @@
+<div class="vaccines-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Vacunas</h1>
+        <p class="page-subtitle">Calendario de vacunación</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="hbadge hbadge--amber">{{ pending.length }} pendientes</span>
+      <span class="hbadge hbadge--green">{{ administered.length }} aplicadas</span>
+    </div>
+  </div>
+
+  <!-- Toast success -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !selectedVaccine()) {
+    <div class="toast toast--error" role="alert">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando vacunas...</p>
+    </div>
+  } @else {
+
+    <!-- Pending -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">
+          <span class="title-badge title-badge--amber">{{ pending.length }}</span>
+          Pendientes
+        </h2>
+      </div>
+
+      @if (pending.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="20" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1.5"/>
+              <path d="M16 24l6 6 10-12" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p>¡Todo al día! No hay vacunas pendientes.</p>
+        </div>
+      } @else {
+        <div class="vaccine-grid">
+          @for (v of pending; track v.id; let i = $index) {
+            <div class="vcard vcard--pending" [style.animation-delay]="(i * 60) + 'ms'">
+              <div class="vcard-top">
+                <div class="vcard-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <span class="vcard-status vcard-status--pending">Pendiente</span>
+              </div>
+              <h3 class="vcard-name">{{ v.name }}</h3>
+              <div class="vcard-meta">
+                <span class="vmeta-tag">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="7" cy="7" r="5.5"/>
+                    <path d="M7 4.5v3l1.5 1.5"/>
+                  </svg>
+                  {{ v.ageLabel }}
+                </span>
+                <span class="vmeta-tag">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="1.5" y="2" width="11" height="10" rx="1.5"/>
+                    <path d="M4.5 1v2M9.5 1v2M1.5 6h11"/>
+                  </svg>
+                  {{ v.scheduledDate | slice:0:10 }}
+                </span>
+              </div>
+              <button class="vcard-btn" (click)="openModal(v)" type="button">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 3v10M3 8h10"/>
+                </svg>
+                Marcar administrada
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Administered -->
+    @if (administered.length > 0) {
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">
+            <span class="title-badge title-badge--green">{{ administered.length }}</span>
+            Administradas
+          </h2>
+        </div>
+        <div class="vaccine-grid">
+          @for (v of administered; track v.id; let i = $index) {
+            <div class="vcard vcard--done" [style.animation-delay]="(i * 50) + 'ms'">
+              <div class="vcard-top">
+                <div class="vcard-icon vcard-icon--done">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                </div>
+                <span class="vcard-status vcard-status--done">Aplicada</span>
+              </div>
+              <h3 class="vcard-name">{{ v.name }}</h3>
+              <div class="vcard-meta">
+                <span class="vmeta-tag">{{ v.ageLabel }}</span>
+                @if (v.administeredDate) {
+                  <span class="vmeta-tag vmeta-tag--green">{{ v.administeredDate | slice:0:10 }}</span>
+                }
+                @if (v.location) {
+                  <span class="vmeta-tag">{{ v.location }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<!-- Modal -->
+@if (selectedVaccine()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <div class="modal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="modal-title">Registrar vacuna</h3>
+            <p class="modal-subtitle">{{ selectedVaccine()!.name }}</p>
+          </div>
+        </div>
+        <button class="icon-btn" (click)="closeModal()" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (error()) {
+          <div class="toast toast--error">{{ error() }}</div>
+        }
+
+        <div class="form-grid">
+          <div class="form-group form-group--full">
+            <label for="adminDate" class="form-label">Fecha de administración *</label>
+            <input id="adminDate" type="date" class="form-input" [(ngModel)]="form.administeredDate" required/>
+          </div>
+          <div class="form-group">
+            <label for="location" class="form-label">Centro de salud</label>
+            <input id="location" type="text" class="form-input" [(ngModel)]="form.location" placeholder="Ej: CESFAM Los Andes"/>
+          </div>
+          <div class="form-group">
+            <label for="batchLot" class="form-label">Lote / Serie</label>
+            <input id="batchLot" type="text" class="form-input" [(ngModel)]="form.batchLot" placeholder="Ej: ABC123"/>
+          </div>
+          <div class="form-group form-group--full">
+            <label for="reactions" class="form-label">Reacciones observadas</label>
+            <input id="reactions" type="text" class="form-input" [(ngModel)]="form.reactions" placeholder="Ej: Leve enrojecimiento"/>
+          </div>
+          <div class="form-group form-group--full">
+            <label for="notes" class="form-label">Notas</label>
+            <textarea id="notes" class="form-input form-textarea" [(ngModel)]="form.notes" placeholder="Observaciones..." rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn--ghost" (click)="closeModal()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="confirm()" type="button" [disabled]="saving() || !form.administeredDate">
+          @if (saving()) {
+            <span class="spinner-sm"></span> Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Confirmar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,173 @@
+<!-- Canvas SIEMPRE en el DOM para que ViewChild funcione desde ngAfterViewInit -->
+<canvas #canvas3d class="canvas3d canvas3d--hidden"></canvas>
+
+@if (loading()) {
+  <div class="loading-page">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring pulse-ring--2"></div>
+    <div class="loader-icon">
+      <svg viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="12" fill="url(#lg-load)"/>
+        <circle cx="11" cy="13" r="1.8" fill="white" opacity="0.9"/>
+        <circle cx="17" cy="13" r="1.8" fill="white" opacity="0.9"/>
+        <path d="M10 18c1.2 1.5 2.5 2 4 2s2.8-.5 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="lg-load" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#38bdf8"/><stop offset="1" stop-color="#7dd3fc"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <p>Cargando datos...</p>
+  </div>
+} @else {
+  <div class="dashboard">
+
+    <!-- ── Hero row ──────────────────────────────────────────────────────── -->
+    <div class="hero-row">
+      <div class="hero-text">
+        <p class="greeting-label">{{ greeting }}</p>
+        <h1 class="hero-name">{{ auth.user()?.name?.split(' ')?.[0] ?? '' }}</h1>
+        @if (child()) {
+          <div class="child-pill">
+            <span class="child-dot"></span>
+            <strong>{{ child()!.name }}</strong>&nbsp;&middot;&nbsp;{{ ageText }}
+          </div>
+        } @else {
+          <div class="child-pill child-pill--empty">Configura el perfil de tu bebé</div>
+        }
+        <div class="hero-actions">
+          <a routerLink="/vaccines" class="hero-btn hero-btn--primary">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Vacunas
+          </a>
+          <a routerLink="/growth" class="hero-btn hero-btn--secondary">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+            </svg>
+            Crecimiento
+          </a>
+        </div>
+      </div>
+
+      <!-- 3D model card -->
+      <div class="model-card">
+        @if (!modelReady()) {
+          <div class="model-loading">
+            <div class="ring-progress">
+              <svg viewBox="0 0 56 56">
+                <circle class="ring-bg" cx="28" cy="28" r="22"/>
+                <circle class="ring-fg" cx="28" cy="28" r="22"
+                  [style.stroke-dashoffset]="138.2 - (138.2 * modelProgress() / 100)"/>
+              </svg>
+              <span>{{ modelProgress() }}%</span>
+            </div>
+            <p>Cargando modelo...</p>
+          </div>
+        }
+        <!-- Canvas real movido aquí visualmente con JS, el elemento DOM está arriba -->
+        <div class="canvas-slot" #canvasSlot></div>
+        @if (modelReady()) {
+          <div class="model-hint">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="8" cy="8" r="6.5"/>
+              <path d="M5.5 8h5M8 5.5v5"/>
+            </svg>
+            Arrastra · Zoom
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Stats ─────────────────────────────────────────────────────────── -->
+    <div class="stats-row">
+      <a routerLink="/vaccines" class="stat-chip stat-chip--indigo">
+        <div class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="chip-body">
+          <span class="chip-val">{{ pendingVaccines().length }}</span>
+          <span class="chip-lbl">Vacunas pendientes</span>
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+
+      <a routerLink="/growth" class="stat-chip stat-chip--teal">
+        <div class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
+          </svg>
+        </div>
+        <div class="chip-body">
+          @if (lastMeasurement()) {
+            <span class="chip-val">{{ lastMeasurement()!.weightKg }} kg</span>
+            <span class="chip-lbl">Último peso</span>
+          } @else {
+            <span class="chip-val">—</span>
+            <span class="chip-lbl">Sin registros</span>
+          }
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+
+      <a routerLink="/growth" class="stat-chip stat-chip--pink">
+        <div class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <path d="M5 9l7-7 7 7"/>
+          </svg>
+        </div>
+        <div class="chip-body">
+          @if (lastMeasurement()) {
+            <span class="chip-val">{{ lastMeasurement()!.heightCm }} cm</span>
+            <span class="chip-lbl">Última talla</span>
+          } @else {
+            <span class="chip-val">—</span>
+            <span class="chip-lbl">Sin registros</span>
+          }
+        </div>
+        <svg class="chip-arrow" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- ── Próximas vacunas ───────────────────────────────────────────────── -->
+    @if (pendingVaccines().length > 0) {
+      <div class="section-card">
+        <div class="section-head">
+          <h2 class="section-title">
+            <span class="title-dot title-dot--amber"></span>
+            Próximas vacunas
+          </h2>
+          <a routerLink="/vaccines" class="see-all">Ver todas →</a>
+        </div>
+        <div class="vaccine-timeline">
+          @for (v of pendingVaccines(); track v.id; let i = $index) {
+            <div class="vt-item" [style.animation-delay]="(i * 80) + 'ms'">
+              <div class="vt-line">
+                <div class="vt-dot"></div>
+                @if (!$last) { <div class="vt-connector"></div> }
+              </div>
+              <div class="vt-content">
+                <span class="vt-name">{{ v.name }}</span>
+                <span class="vt-meta">{{ v.ageLabel }} &middot; {{ v.scheduledDate | slice:0:10 }}</span>
+              </div>
+              <a routerLink="/vaccines" class="vt-btn">Registrar</a>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+}

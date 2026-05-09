@@ -1,0 +1,188 @@
+<div class="growth-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18"/>
+          <path d="M7 16l4-4 4 4 4-8"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Crecimiento</h1>
+        <p class="page-subtitle">Seguimiento de peso y talla</p>
+      </div>
+    </div>
+    <button class="btn-add" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        Registrar medición
+      }
+    </button>
+  </div>
+
+  <!-- Toast -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  <!-- Form -->
+  @if (showForm()) {
+    <div class="form-card">
+      <h2 class="form-title">Nueva medición</h2>
+
+      @if (error()) {
+        <div class="toast toast--error">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="mDate" class="form-label">Fecha *</label>
+          <input id="mDate" type="date" class="form-input" [(ngModel)]="form.date" required/>
+        </div>
+        <div class="form-group">
+          <label for="mWeight" class="form-label">Peso (kg) *</label>
+          <input id="mWeight" type="number" class="form-input" [(ngModel)]="form.weightKg"
+            placeholder="Ej: 7.5" step="0.1" min="0.5" max="30" required/>
+        </div>
+        <div class="form-group">
+          <label for="mHeight" class="form-label">Talla (cm) *</label>
+          <input id="mHeight" type="number" class="form-input" [(ngModel)]="form.heightCm"
+            placeholder="Ej: 68" step="0.1" min="30" max="130" required/>
+        </div>
+        <div class="form-group">
+          <label for="mHead" class="form-label">Perímetro cefálico (cm)</label>
+          <input id="mHead" type="number" class="form-input" [(ngModel)]="form.headCircumferenceCm"
+            placeholder="Ej: 42" step="0.1" min="20" max="60"/>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="submit()" type="button" [disabled]="saving()">
+          @if (saving()) {
+            <span class="spinner-sm"></span> Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Guardar
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando mediciones...</p>
+    </div>
+  } @else if (measurements().length === 0) {
+    <div class="empty-state">
+      <div class="empty-orb">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" fill="rgba(14,165,233,0.1)" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+          <path d="M16 40l10-12 8 8 6-8 8 12" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="26" cy="28" r="2" fill="#0ea5e9"/>
+        </svg>
+      </div>
+      <p>Aún no hay mediciones registradas.</p>
+      <button class="btn btn--confirm" (click)="toggleForm()" type="button">
+        Registrar primera medición
+      </button>
+    </div>
+  } @else {
+
+    <!-- Last measurement summary -->
+    <div class="summary-row">
+      <div class="summary-chip summary-chip--blue">
+        <span class="chip-label">Último peso</span>
+        <span class="chip-value">{{ lastMeasurement!.weightKg }} <small>kg</small></span>
+        <span class="chip-date">{{ lastMeasurement!.date | slice:0:10 }}</span>
+      </div>
+      <div class="summary-chip summary-chip--sky">
+        <span class="chip-label">Última talla</span>
+        <span class="chip-value">{{ lastMeasurement!.heightCm }} <small>cm</small></span>
+        <span class="chip-date">{{ lastMeasurement!.date | slice:0:10 }}</span>
+      </div>
+      @if (lastMeasurement!.headCircumferenceCm) {
+        <div class="summary-chip summary-chip--teal">
+          <span class="chip-label">Perímetro cefálico</span>
+          <span class="chip-value">{{ lastMeasurement!.headCircumferenceCm }} <small>cm</small></span>
+          <span class="chip-date">{{ lastMeasurement!.date | slice:0:10 }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-dot chart-dot--blue"></div>
+          <h3 class="chart-title">Peso (kg)</h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-dot chart-dot--sky"></div>
+          <h3 class="chart-title">Talla (cm)</h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="heightChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div class="history-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <span class="title-dot"></span>
+          Historial
+        </h3>
+        <span class="record-count">{{ measurements().length }} registros</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Peso (kg)</th>
+              <th>Talla (cm)</th>
+              <th>P. Cefálico (cm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of measurements().slice().reverse(); track m.id; let i = $index) {
+              <tr [style.animation-delay]="(i * 30) + 'ms'">
+                <td>{{ m.date | slice:0:10 }}</td>
+                <td><span class="td-val td-val--blue">{{ m.weightKg }}</span></td>
+                <td><span class="td-val td-val--sky">{{ m.heightCm }}</span></td>
+                <td>{{ m.headCircumferenceCm || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

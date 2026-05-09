@@ -1,0 +1,47 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="18" fill="rgba(255,255,255,0.15)"/>
+          <circle cx="17" cy="20" r="2.5" fill="white" opacity="0.9"/>
+          <circle cx="27" cy="20" r="2.5" fill="white" opacity="0.9"/>
+          <path d="M15 27c1.8 2.2 3.8 3 7 3s5.2-.8 7-3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="17" cy="20" r="1" fill="#1e293b"/>
+          <circle cx="27" cy="20" r="1" fill="#1e293b"/>
+        </svg>
+      </div>
+      <h1 class="brand-name">BabyApp</h1>
+      <p class="brand-tagline">El diario de crecimiento de tu bebé</p>
+    </div>
+
+    <div class="login-content">
+      <h2 class="login-title">Bienvenido de vuelta</h2>
+      <p class="login-subtitle">Inicia sesión para continuar</p>
+
+      @if (error()) {
+        <div class="error-banner" role="alert">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="error-icon">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <span>Verificando...</span>
+        </div>
+      } @else {
+        <div class="google-btn-wrapper">
+          <div id="google-btn"></div>
+        </div>
+      }
+
+      <p class="privacy-note">
+        Al iniciar sesión aceptas nuestros términos de uso.<br>Tu información está protegida.
+      </p>
+    </div>
+  </div>
+</div>

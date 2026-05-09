@@ -1,0 +1,145 @@
+<div class="shell">
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+  }
+
+  <aside class="sidebar" [class.sidebar--open]="sidebarOpen()">
+    <!-- Logo -->
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-orb">
+          <svg viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="12" fill="url(#lg-shell)"/>
+            <circle cx="11" cy="13" r="1.8" fill="white" opacity="0.9"/>
+            <circle cx="17" cy="13" r="1.8" fill="white" opacity="0.9"/>
+            <path d="M10 18c1.2 1.5 2.5 2 4 2s2.8-.5 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="lg-shell" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0ea5e9"/>
+                <stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">BabyApp</span>
+      </div>
+      <button class="icon-btn sidebar-close" (click)="closeSidebar()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- User -->
+    @if (auth.user()) {
+      <div class="sidebar-user">
+        @if (auth.user()?.picture) {
+          <img [src]="auth.user()!.picture" [alt]="auth.user()!.name" class="user-avatar" referrerpolicy="no-referrer"/>
+        } @else {
+          <div class="user-avatar-placeholder">{{ auth.user()!.name.charAt(0).toUpperCase() }}</div>
+        }
+        <div class="user-info">
+          <span class="user-name">{{ auth.user()!.name }}</span>
+          <span class="user-role">Padre / Madre</span>
+        </div>
+      </div>
+    }
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="nav-item--active"
+           class="nav-item" (click)="closeSidebar()"
+           [style.--item-color]="item.color">
+          <span class="nav-icon-wrap">
+            @switch (item.icon) {
+              @case ('home') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              }
+              @case ('shield') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+              }
+              @case ('chart') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3v18h18"/>
+                  <path d="M7 16l4-4 4 4 4-8"/>
+                </svg>
+              }
+            }
+          </span>
+          <span class="nav-label">{{ item.label }}</span>
+          <span class="nav-active-dot"></span>
+        </a>
+      }
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <button class="theme-toggle" (click)="theme.toggle()" type="button">
+        @if (theme.isDark()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span>Modo claro</span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+          <span>Modo oscuro</span>
+        }
+      </button>
+      <button class="logout-btn" (click)="logout()" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-wrapper">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" (click)="toggleSidebar()" aria-label="Menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <span class="topbar-brand">BabyApp</span>
+      <div class="topbar-actions">
+        <button class="icon-btn" (click)="theme.toggle()" aria-label="Cambiar tema">
+          @if (theme.isDark()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          }
+        </button>
+        @if (auth.user()?.picture) {
+          <img [src]="auth.user()!.picture" [alt]="auth.user()!.name" class="topbar-avatar" referrerpolicy="no-referrer"/>
+        } @else if (auth.user()) {
+          <div class="topbar-avatar-placeholder">{{ auth.user()!.name.charAt(0).toUpperCase() }}</div>
+        }
+      </div>
+    </header>
+
+    <main class="main-content">
+      <router-outlet/>
+    </main>
+  </div>
+</div>
