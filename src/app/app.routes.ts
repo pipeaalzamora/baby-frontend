@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { childGuard } from './core/guards/child.guard';
 
 export const routes: Routes = [
   {
@@ -8,10 +9,17 @@ export const routes: Routes = [
       import('./features/login/login.component').then(m => m.LoginComponent),
   },
   {
+    // Setup: requiere auth pero NO childGuard (el bebé aún no existe)
+    path: 'setup',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/setup/setup.component').then(m => m.SetupComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layout/shell/shell.component').then(m => m.ShellComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, childGuard],
     children: [
       {
         path: 'dashboard',

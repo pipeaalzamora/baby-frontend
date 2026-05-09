@@ -70,15 +70,17 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.lastMeasurement.set(sorted[0] ?? null);
       this.loading.set(false);
 
-      // Once data loads, move canvas into the visible slot
-      setTimeout(() => this.mountCanvas(), 50);
+      // Once data loads, move canvas into the visible slot and load model
+      setTimeout(() => {
+        this.mountCanvas();
+        this.loadModel();
+      }, 50);
     });
   }
 
   ngAfterViewInit() {
     // Init Three.js immediately — canvas is always in DOM
     this.initScene();
-    this.loadModel();
     this.animate();
   }
 
@@ -194,8 +196,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadModel() {
+    const modelKey = this.child()?.modelKey || 'baby';
     new GLTFLoader().load(
-      'models/baby.glb',
+      `/models/${modelKey}.glb`,
       (gltf) => {
         const model = gltf.scene;
         const box = new THREE.Box3().setFromObject(model);

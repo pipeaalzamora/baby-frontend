@@ -25,8 +25,17 @@ export interface Child {
   photoUrl?: string;
   birthWeightKg: number;
   birthHeightCm: number;
+  modelKey: string;   // clave del modelo 3D elegido, ej: 'baby'
   createdAt: string;
   updatedAt: string;
+}
+
+// Modelos 3D disponibles para elegir
+export interface BabyModel {
+  key: string;
+  label: string;
+  file: string;   // ruta relativa a /models/
+  preview: string; // emoji o imagen de preview
 }
 
 // ─── Vaccine ──────────────────────────────────────────────────────────────────

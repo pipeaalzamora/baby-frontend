@@ -1,0 +1,143 @@
+<div class="setup-page">
+
+  <!-- Canvas 3D siempre en el DOM para que Three.js funcione -->
+  <canvas #previewCanvas class="preview-canvas" [class.preview-canvas--hidden]="step() === 1"></canvas>
+
+  <div class="setup-card">
+
+    <!-- Header -->
+    <div class="setup-header">
+      <div class="setup-logo">🍼</div>
+      <h1 class="setup-title">¡Bienvenido!</h1>
+      <p class="setup-subtitle">Cuéntanos sobre tu bebé para comenzar</p>
+
+      <!-- Steps indicator -->
+      <div class="steps-indicator">
+        <div class="step-dot" [class.step-dot--active]="step() === 1" [class.step-dot--done]="step() === 2"></div>
+        <div class="step-line" [class.step-line--done]="step() === 2"></div>
+        <div class="step-dot" [class.step-dot--active]="step() === 2"></div>
+      </div>
+      <p class="step-label">{{ step() === 1 ? 'Datos del bebé' : 'Elige el modelo 3D' }}</p>
+    </div>
+
+    <!-- ── STEP 1: Datos ── -->
+    @if (step() === 1) {
+      <form class="setup-form" (ngSubmit)="goToStep2()">
+
+        <div class="form-group">
+          <label for="name">Nombre del bebé *</label>
+          <input id="name" type="text" [(ngModel)]="name" name="name"
+                 placeholder="Ej: Sofía" autocomplete="off" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="birthDate">Fecha de nacimiento *</label>
+            <input id="birthDate" type="date" [(ngModel)]="birthDate" name="birthDate"
+                   [max]="maxDate" required />
+          </div>
+
+          <div class="form-group">
+            <label>Sexo *</label>
+            <div class="gender-toggle">
+              <button type="button" class="gender-btn"
+                      [class.gender-btn--active]="gender === 'M'"
+                      (click)="gender = 'M'">
+                Niño
+              </button>
+              <button type="button" class="gender-btn"
+                      [class.gender-btn--active]="gender === 'F'"
+                      (click)="gender = 'F'">
+                Niña
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="weight">Peso al nacer (kg)</label>
+            <input id="weight" type="number" [(ngModel)]="birthWeightKg" name="birthWeightKg"
+                   min="0.5" max="6" step="0.01" placeholder="3.20" />
+          </div>
+
+          <div class="form-group">
+            <label for="height">Talla al nacer (cm)</label>
+            <input id="height" type="number" [(ngModel)]="birthHeightCm" name="birthHeightCm"
+                   min="30" max="70" step="0.1" placeholder="50" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="blood">Grupo sanguíneo <span class="optional">(opcional)</span></label>
+          <select id="blood" [(ngModel)]="bloodType" name="bloodType">
+            <option value="">No sé / No especificar</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+
+        @if (errorMsg()) {
+          <p class="error-msg">{{ errorMsg() }}</p>
+        }
+
+        <button type="submit" class="btn-primary">
+          Siguiente →
+        </button>
+
+      </form>
+    }
+
+    <!-- ── STEP 2: Modelo 3D ── -->
+    @if (step() === 2) {
+      <div class="model-step">
+
+        <div class="model-grid">
+          @for (m of models; track m.key) {
+            <button type="button" class="model-card"
+                    [class.model-card--selected]="selectedModel() === m.key"
+                    (click)="selectModel(m.key)">
+              <span class="model-emoji">{{ m.preview }}</span>
+              <span class="model-label">{{ m.label }}</span>
+              @if (selectedModel() === m.key) {
+                <span class="model-check">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              }
+            </button>
+          }
+        </div>
+
+        <!-- Preview 3D -->
+        <div class="preview-wrapper">
+          @if (!previewReady()) {
+            <div class="preview-loading">
+              <div class="spinner"></div>
+              <span>Cargando modelo...</span>
+            </div>
+          }
+        </div>
+
+        @if (errorMsg()) {
+          <p class="error-msg">{{ errorMsg() }}</p>
+        }
+
+        <div class="step2-actions">
+          <button type="button" class="btn-secondary" (click)="goToStep1()">
+            ← Atrás
+          </button>
+          <button type="button" class="btn-primary" (click)="save()"
+                  [disabled]="saving()">
+            @if (saving()) { Guardando... } @else { ¡Listo! }
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
