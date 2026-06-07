@@ -169,6 +169,7 @@
               <th>Peso (kg)</th>
               <th>Talla (cm)</th>
               <th>P. Cefálico (cm)</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -178,6 +179,13 @@
                 <td><span class="td-val td-val--blue">{{ m.weightKg }}</span></td>
                 <td><span class="td-val td-val--sky">{{ m.heightCm }}</span></td>
                 <td>{{ m.headCircumferenceCm || '—' }}</td>
+                <td>
+                  <button class="btn-delete" (click)="deleteRecord(m.id)" type="button" aria-label="Eliminar medición">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 4h12M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/>
+                    </svg>
+                  </button>
+                </td>
               </tr>
             }
           </tbody>

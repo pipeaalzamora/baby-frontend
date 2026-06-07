@@ -115,4 +115,19 @@ export class CheckupsComponent implements OnInit {
       },
     });
   }
+
+  deleteCheckup(id: string) {
+    if (!confirm('¿Eliminar este control médico?')) return;
+    this.svc.delete(id).subscribe({
+      next: () => {
+        this.success.set('Control eliminado.');
+        setTimeout(() => this.success.set(null), 3000);
+        this.load();
+      },
+      error: (err) => {
+        this.error.set(err?.error?.error ?? 'Error al eliminar.');
+        setTimeout(() => this.error.set(null), 3000);
+      },
+    });
+  }
 }

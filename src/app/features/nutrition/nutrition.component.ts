@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { RecipeService } from '../../core/services/recipe.service';
 import { Recipe, FoodIntroduction, RecipeIngredient } from '../../core/models/models';
+import { forkJoin } from 'rxjs';
 
 interface RecipeForm {
   name: string;
@@ -97,22 +98,17 @@ export class NutritionComponent implements OnInit {
 
   private loadAll() {
     this.loading.set(true);
-    this.svc.listRecipes().subscribe({
-      next: (list) => {
-        this.recipes.set(list);
-        this.svc.listIntroductions().subscribe({
-          next: (intros) => {
-            this.introductions.set(intros.sort((a, b) => b.date.localeCompare(a.date)));
-            this.loading.set(false);
-          },
-          error: () => {
-            this.error.set('Error al cargar introducciones.');
-            this.loading.set(false);
-          },
-        });
+    forkJoin({
+      recipes: this.svc.listRecipes(),
+      introductions: this.svc.listIntroductions(),
+    }).subscribe({
+      next: ({ recipes, introductions }) => {
+        this.recipes.set(recipes);
+        this.introductions.set(introductions.sort((a, b) => b.date.localeCompare(a.date)));
+        this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Error al cargar recetas.');
+      error: (err) => {
+        this.error.set(err?.error?.error ?? 'Error al cargar datos de nutrición.');
         this.loading.set(false);
       },
     });

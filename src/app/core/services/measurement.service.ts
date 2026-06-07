@@ -15,4 +15,8 @@ export class MeasurementService {
   create(data: Omit<Measurement, 'id' | 'childId' | 'createdAt'>) {
     return this.http.post<Measurement>(this.base, data);
   }
+
+  delete(id: string) {
+    return this.http.delete<{ ok: boolean }>(`${this.base}/${id}`);
+  }
 }

@@ -15,4 +15,8 @@ export class CheckupService {
   create(data: Partial<Checkup>) {
     return this.http.post<Checkup>(this.base, data);
   }
+
+  delete(id: string) {
+    return this.http.delete<{ ok: boolean }>(`${this.base}/${id}`);
+  }
 }

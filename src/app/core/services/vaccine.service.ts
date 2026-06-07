@@ -13,7 +13,7 @@ export class VaccineService {
   }
 
   markAdministered(id: string, data: { administeredDate: string; location?: string; batchLot?: string; reactions?: string; notes?: string }) {
-    return this.http.post<Vaccine>(`${this.base}/${id}`, data);
+    return this.http.patch<Vaccine>(`${this.base}/${id}`, data);
   }
 
   bulkCreate(vaccines: Partial<Vaccine>[]) {

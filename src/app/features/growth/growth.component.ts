@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, inject, signal,
+  Component, OnInit, OnDestroy, inject, signal, afterNextRender, Injector,
 } from '@angular/core';
 import { SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,8 @@ interface MeasurementForm {
   styleUrls: ['./growth.component.scss'],
 })
 export class GrowthComponent implements OnInit, OnDestroy {
-  private svc = inject(MeasurementService);
+  private svc      = inject(MeasurementService);
+  private injector = inject(Injector);
 
   measurements = signal<Measurement[]>([]);
   loading      = signal(true);
@@ -42,12 +43,10 @@ export class GrowthComponent implements OnInit, OnDestroy {
 
   private weightChart: Chart | null = null;
   private heightChart: Chart | null = null;
-  private retryTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit() { this.load(); }
 
   ngOnDestroy() {
-    if (this.retryTimer) clearTimeout(this.retryTimer);
     this.weightChart?.destroy();
     this.heightChart?.destroy();
   }
@@ -58,31 +57,18 @@ export class GrowthComponent implements OnInit, OnDestroy {
       next: (list) => {
         this.measurements.set(list.sort((a, b) => a.date.localeCompare(b.date)));
         this.loading.set(false);
-        // Double rAF: first frame Angular updates DOM, second frame browser paints
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            this.tryRenderCharts();
-          });
-        });
+        // afterNextRender garantiza que Angular terminó de renderizar el DOM
+        afterNextRender(() => {
+          const w = document.getElementById('weightChart') as HTMLCanvasElement | null;
+          const h = document.getElementById('heightChart') as HTMLCanvasElement | null;
+          if (w && h) this.renderCharts(w, h);
+        }, { injector: this.injector });
       },
-      error: () => {
-        this.error.set('Error al cargar mediciones.');
+      error: (err) => {
+        this.error.set(err?.error?.error ?? 'Error al cargar mediciones.');
         this.loading.set(false);
       },
     });
-  }
-
-  /** Retry until both canvas elements are in the DOM */
-  private tryRenderCharts(attempt = 0) {
-    const w = document.getElementById('weightChart') as HTMLCanvasElement | null;
-    const h = document.getElementById('heightChart') as HTMLCanvasElement | null;
-
-    if (w && h) {
-      this.renderCharts(w, h);
-    } else if (attempt < 20) {
-      // Retry every 50ms up to 1 second
-      this.retryTimer = setTimeout(() => this.tryRenderCharts(attempt + 1), 50);
-    }
   }
 
   get lastMeasurement(): Measurement | null {
@@ -132,6 +118,21 @@ export class GrowthComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.saving.set(false);
         this.error.set(err?.error?.error ?? 'Error al guardar.');
+      },
+    });
+  }
+
+  deleteRecord(id: string) {
+    if (!confirm('¿Eliminar esta medición?')) return;
+    this.svc.delete(id).subscribe({
+      next: () => {
+        this.success.set('Medición eliminada.');
+        setTimeout(() => this.success.set(null), 3000);
+        this.load();
+      },
+      error: (err) => {
+        this.error.set(err?.error?.error ?? 'Error al eliminar.');
+        setTimeout(() => this.error.set(null), 3000);
       },
     });
   }
