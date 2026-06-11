@@ -1,0 +1,151 @@
+<div class="profile-page">
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21a8 8 0 10-16 0"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Perfil familiar</h1>
+        <p class="page-subtitle">Administra los perfiles de tus hijos y el perfil activo de la app.</p>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn--primary" (click)="startCreate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Agregar hijo
+    </button>
+  </header>
+
+  @if (error()) {
+    <div class="toast toast--error">{{ error() }}</div>
+  }
+  @if (success()) {
+    <div class="toast toast--success">{{ success() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="panel panel--loading">Cargando perfiles...</div>
+  } @else {
+    <div class="profile-layout">
+      <aside class="children-panel">
+        <div class="panel-head">
+          <h2>Hijos</h2>
+          <span>{{ children().length }}</span>
+        </div>
+
+        <div class="children-list">
+          @for (child of children(); track child.id) {
+            <button
+              type="button"
+              class="child-card"
+              [class.child-card--active]="activeChild()?.id === child.id"
+              (click)="selectChild(child)"
+            >
+              @if (child.photoUrl) {
+                <img [src]="child.photoUrl" [alt]="child.name" class="child-avatar" />
+              } @else {
+                <div class="child-avatar child-avatar--placeholder">
+                  {{ child.name.charAt(0).toUpperCase() }}
+                </div>
+              }
+              <span class="child-card-main">
+                <strong>{{ child.name }}</strong>
+                <small>{{ ageFor(child) }}</small>
+              </span>
+              @if (activeChild()?.id === child.id) {
+                <span class="active-badge">Activo</span>
+              }
+            </button>
+          }
+        </div>
+      </aside>
+
+      <section class="editor-panel">
+        <div class="editor-head">
+          <label class="avatar-uploader">
+            @if (previewUrl() || photoUrl) {
+              <img [src]="previewUrl() || photoUrl" [alt]="name || 'Foto de perfil'" />
+            } @else {
+              <span>{{ name ? name.charAt(0).toUpperCase() : '+' }}</span>
+            }
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+          </label>
+
+          <div>
+            <p class="editor-kicker">{{ mode() === 'create' ? 'Nuevo perfil' : 'Perfil activo' }}</p>
+            <h2>{{ mode() === 'create' ? 'Agregar hijo' : name || 'Perfil de tu hijo' }}</h2>
+            <p>{{ mode() === 'create' ? 'Los datos se guardarán como un nuevo perfil.' : ageFor(activeChild()) }}</p>
+          </div>
+        </div>
+
+        @if (uploadProgress() > 0 && uploadProgress() < 100) {
+          <div class="progress-wrap">
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+            </div>
+            <span>{{ uploadProgress() }}%</span>
+          </div>
+        }
+
+        <form class="profile-form" (ngSubmit)="save()">
+          <div class="form-group form-group--full">
+            <label for="name">Nombre *</label>
+            <input id="name" type="text" [(ngModel)]="name" name="name" autocomplete="off" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="birthDate">Fecha de nacimiento *</label>
+              <input id="birthDate" type="date" [(ngModel)]="birthDate" name="birthDate" [max]="maxDate" required />
+            </div>
+
+            <div class="form-group">
+              <label>Sexo *</label>
+              <div class="segmented">
+                <button type="button" [class.segmented__item--active]="gender === 'M'" (click)="gender = 'M'">Niño</button>
+                <button type="button" [class.segmented__item--active]="gender === 'F'" (click)="gender = 'F'">Niña</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="weight">Peso al nacer kg</label>
+              <input id="weight" type="number" [(ngModel)]="birthWeightKg" name="birthWeightKg" min="0" max="10" step="0.01" />
+            </div>
+
+            <div class="form-group">
+              <label for="height">Talla al nacer cm</label>
+              <input id="height" type="number" [(ngModel)]="birthHeightCm" name="birthHeightCm" min="0" max="80" step="0.1" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bloodType">Grupo sanguíneo</label>
+            <select id="bloodType" [(ngModel)]="bloodType" name="bloodType">
+              <option value="">No especificado</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>O+</option><option>O-</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            @if (mode() === 'create') {
+              <button type="button" class="btn btn--ghost" (click)="cancelCreate()" [disabled]="saving()">Cancelar</button>
+            }
+            <button type="submit" class="btn btn--primary" [disabled]="saving()">
+              @if (saving()) { Guardando... } @else { Guardar perfil }
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

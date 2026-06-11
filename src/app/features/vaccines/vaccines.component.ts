@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { VaccineService } from '../../core/services/vaccine.service';
 import { Vaccine } from '../../core/models/models';
+import { ChileHealthService, HealthCenter, SourceInfo } from '../../core/services/chile-health.service';
 
 interface AdministerForm {
   administeredDate: string;
@@ -21,12 +22,19 @@ interface AdministerForm {
 })
 export class VaccinesComponent implements OnInit {
   private svc = inject(VaccineService);
+  private chile = inject(ChileHealthService);
 
   vaccines = signal<Vaccine[]>([]);
+  healthCenters = signal<HealthCenter[]>([]);
+  healthSource = signal<SourceInfo | null>(null);
   loading = signal(true);
+  loadingCenters = signal(false);
+  seeding = signal(false);
   saving = signal(false);
   error = signal<string | null>(null);
+  centerError = signal<string | null>(null);
   success = signal<string | null>(null);
+  scheduleSource = signal<{ source: string; version: string; url: string } | null>(null);
 
   // Modal state
   selectedVaccine = signal<Vaccine | null>(null);
@@ -37,6 +45,7 @@ export class VaccinesComponent implements OnInit {
     reactions: '',
     notes: '',
   };
+  centerSearch = 'CESFAM';
 
   ngOnInit() {
     this.load();
@@ -46,12 +55,41 @@ export class VaccinesComponent implements OnInit {
     this.loading.set(true);
     this.svc.list().subscribe({
       next: (list) => {
-        this.vaccines.set(list.sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate)));
+        const sorted = list.sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
+        this.vaccines.set(sorted);
+        if (sorted.length > 0) {
+          const sourced = sorted.find((v) => v.source || v.scheduleVersion);
+          if (sourced) {
+            this.scheduleSource.set({
+              source: sourced.source ?? 'Programa Nacional de Inmunizaciones',
+              version: sourced.scheduleVersion ?? 'Calendario local',
+              url: 'https://vacunas.minsal.cl/calendarios-de-vacunacion/',
+            });
+          }
+        }
         this.loading.set(false);
       },
       error: () => {
         this.error.set('Error al cargar vacunas.');
         this.loading.set(false);
+      },
+    });
+  }
+
+  seedLocalSchedule() {
+    this.seeding.set(true);
+    this.error.set(null);
+    this.svc.seedLocal().subscribe({
+      next: (res) => {
+        this.scheduleSource.set({ source: res.source, version: res.version, url: res.url });
+        this.success.set(`Calendario local creado: ${res.inserted} nuevas, ${res.matched} ya existían.`);
+        setTimeout(() => this.success.set(null), 4500);
+        this.seeding.set(false);
+        this.load();
+      },
+      error: (err) => {
+        this.seeding.set(false);
+        this.error.set(err?.error?.error ?? 'No pudimos crear el calendario local.');
       },
     });
   }
@@ -74,10 +112,33 @@ export class VaccinesComponent implements OnInit {
       notes: '',
     };
     this.error.set(null);
+    this.centerError.set(null);
+    this.searchHealthCenters();
   }
 
   closeModal() {
     this.selectedVaccine.set(null);
+    this.centerError.set(null);
+  }
+
+  searchHealthCenters() {
+    this.loadingCenters.set(true);
+    this.centerError.set(null);
+    this.chile.healthCenters({ search: this.centerSearch.trim() || undefined, limit: 8 }).subscribe({
+      next: (res) => {
+        this.healthCenters.set(res.items);
+        this.healthSource.set(res.source);
+        this.loadingCenters.set(false);
+      },
+      error: () => {
+        this.loadingCenters.set(false);
+        this.centerError.set('No pudimos consultar establecimientos DEIS/MINSAL.');
+      },
+    });
+  }
+
+  useHealthCenter(center: HealthCenter) {
+    this.form.location = `${center.name} - ${center.commune}`;
   }
 
   confirm() {

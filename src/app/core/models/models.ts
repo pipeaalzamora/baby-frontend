@@ -8,11 +8,6 @@ export interface AuthUser {
   picture?: string;
 }
 
-export interface AuthResponse {
-  token: string;
-  user: AuthUser;
-}
-
 // ─── Child ────────────────────────────────────────────────────────────────────
 
 export interface Child {
@@ -23,19 +18,15 @@ export interface Child {
   gender: 'M' | 'F';
   bloodType?: string;
   photoUrl?: string;
+  photoProvider?: 's3';
+  photoBucket?: string;
+  photoKey?: string;
+  photoMimeType?: string;
+  photoSize?: number;
   birthWeightKg: number;
   birthHeightCm: number;
-  modelKey: string;   // clave del modelo 3D elegido, ej: 'baby'
   createdAt: string;
   updatedAt: string;
-}
-
-// Modelos 3D disponibles para elegir
-export interface BabyModel {
-  key: string;
-  label: string;
-  file: string;   // ruta relativa a /models/
-  preview: string; // emoji o imagen de preview
 }
 
 // ─── Vaccine ──────────────────────────────────────────────────────────────────
@@ -49,6 +40,8 @@ export interface Vaccine {
   name: string;
   ageLabel: string;
   scheduledDate: string;
+  source?: string;
+  scheduleVersion?: string;
   administeredDate?: string;
   status: VaccineStatus;
   location?: string;
@@ -89,6 +82,9 @@ export interface Checkup {
   observations: string;
   prescriptions: Prescription[];
   nextAppointment?: string;
+  status?: 'pending' | 'completed';
+  completedAt?: string;
+  suggestedKey?: string;
   createdAt: string;
 }
 

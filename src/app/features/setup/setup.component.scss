@@ -1,52 +1,25 @@
-// ─── Layout ───────────────────────────────────────────────────────────────────
-
 .setup-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 60% 20%, #0f2744 0%, #0d1117 70%);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(14, 165, 233, 0.18), transparent 34%),
+    radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.14), transparent 30%),
+    #0d1117;
   padding: 1.5rem;
-  position: relative;
-  overflow: hidden;
 }
-
-// ─── Canvas 3D (step 2) ───────────────────────────────────────────────────────
-
-.preview-canvas {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.9;
-  transition: opacity 0.4s;
-
-  &--hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-
-// ─── Card ─────────────────────────────────────────────────────────────────────
 
 .setup-card {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(125, 211, 252, 0.15);
-  border-radius: 1.5rem;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 1rem;
   padding: 2.5rem 2rem;
   width: 100%;
   max-width: 480px;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.42);
 }
-
-// ─── Header ───────────────────────────────────────────────────────────────────
 
 .setup-header {
   text-align: center;
@@ -68,57 +41,8 @@
 .setup-subtitle {
   color: #94a3b8;
   font-size: 0.95rem;
-  margin: 0 0 1.5rem;
-}
-
-// ─── Steps indicator ──────────────────────────────────────────────────────────
-
-.steps-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  margin-bottom: 0.5rem;
-}
-
-.step-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #1e293b;
-  border: 2px solid #334155;
-  transition: all 0.3s;
-
-  &--active {
-    background: #0ea5e9;
-    border-color: #0ea5e9;
-    box-shadow: 0 0 8px rgba(14, 165, 233, 0.6);
-  }
-
-  &--done {
-    background: #10b981;
-    border-color: #10b981;
-  }
-}
-
-.step-line {
-  width: 48px;
-  height: 2px;
-  background: #334155;
-  transition: background 0.3s;
-
-  &--done {
-    background: #10b981;
-  }
-}
-
-.step-label {
-  font-size: 0.8rem;
-  color: #64748b;
   margin: 0;
 }
-
-// ─── Form ─────────────────────────────────────────────────────────────────────
 
 .setup-form {
   display: flex;
@@ -145,10 +69,11 @@
 
   .optional {
     font-weight: 400;
-    color: #475569;
+    color: #64748b;
   }
 
-  input, select {
+  input,
+  select {
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid #334155;
     border-radius: 0.6rem;
@@ -159,7 +84,9 @@
     width: 100%;
     box-sizing: border-box;
 
-    &::placeholder { color: #475569; }
+    &::placeholder {
+      color: #64748b;
+    }
 
     &:focus {
       outline: none;
@@ -167,7 +94,6 @@
       box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
     }
 
-    // Date input color fix
     &[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(0.6);
       cursor: pointer;
@@ -179,8 +105,6 @@
     color: #f0f9ff;
   }
 }
-
-// ─── Gender toggle ────────────────────────────────────────────────────────────
 
 .gender-toggle {
   display: flex;
@@ -196,9 +120,12 @@
   color: #94a3b8;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
 
-  &:hover { border-color: #0ea5e9; color: #e0f2fe; }
+  &:hover {
+    border-color: #0ea5e9;
+    color: #e0f2fe;
+  }
 
   &--active {
     background: rgba(14, 165, 233, 0.2);
@@ -208,14 +135,12 @@
   }
 }
 
-// ─── Buttons ──────────────────────────────────────────────────────────────────
-
 .btn-primary {
   width: 100%;
   padding: 0.85rem;
   border-radius: 0.75rem;
   border: none;
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -223,25 +148,16 @@
   transition: opacity 0.2s, transform 0.15s;
   margin-top: 0.25rem;
 
-  &:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
-
-.btn-secondary {
-  flex: 1;
-  padding: 0.85rem;
-  border-radius: 0.75rem;
-  border: 1px solid #334155;
-  background: transparent;
-  color: #94a3b8;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover { border-color: #0ea5e9; color: #e0f2fe; }
-}
-
-// ─── Error ────────────────────────────────────────────────────────────────────
 
 .error-msg {
   color: #f87171;
@@ -254,114 +170,12 @@
   border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
-// ─── Step 2: Model selector ───────────────────────────────────────────────────
-
-.model-step {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.model-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.75rem;
-}
-
-.model-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 0.75rem;
-  border-radius: 1rem;
-  border: 2px solid #1e293b;
-  background: rgba(30, 41, 59, 0.6);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #0ea5e9;
-    background: rgba(14, 165, 233, 0.08);
-  }
-
-  &--selected {
-    border-color: #0ea5e9;
-    background: rgba(14, 165, 233, 0.15);
-    box-shadow: 0 0 16px rgba(14, 165, 233, 0.2);
-  }
-}
-
-.model-emoji {
-  font-size: 2.5rem;
-  line-height: 1;
-}
-
-.model-label {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  text-align: center;
-}
-
-.model-check {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  width: 20px;
-  height: 20px;
-  background: #0ea5e9;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-
-  svg { width: 12px; height: 12px; }
-}
-
-// ─── Preview wrapper ──────────────────────────────────────────────────────────
-
-.preview-wrapper {
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.preview-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  color: #64748b;
-  font-size: 0.85rem;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #1e293b;
-  border-top-color: #0ea5e9;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-// ─── Step 2 actions ───────────────────────────────────────────────────────────
-
-.step2-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-// ─── Responsive ───────────────────────────────────────────────────────────────
-
 @media (max-width: 480px) {
-  .setup-card { padding: 2rem 1.25rem; }
-  .form-row { grid-template-columns: 1fr; }
-  .preview-canvas { width: 260px; height: 260px; }
+  .setup-card {
+    padding: 2rem 1.25rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }

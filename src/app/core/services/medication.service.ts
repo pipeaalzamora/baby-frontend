@@ -13,6 +13,12 @@ export interface Medication {
   active: boolean;
   prescribedBy: string;
   reason: string;
+  purchasePharmacy?: string;
+  purchaseAddress?: string;
+  purchaseCommune?: string;
+  medicineRegistration?: string;
+  medicineHolder?: string;
+  saleCondition?: string;
   createdAt: string;
 }
 

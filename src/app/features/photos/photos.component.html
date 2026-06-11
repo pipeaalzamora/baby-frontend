@@ -1,0 +1,234 @@
+<div class="photos-page">
+
+  <!-- ── Header ───────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <span class="header-emoji">📷</span>
+      </div>
+      <div>
+        <h1 class="page-title">Fotos</h1>
+        <p class="page-subtitle">Recuerdos de tu bebé</p>
+      </div>
+    </div>
+
+    @if (!showUploadForm()) {
+      <button class="btn-add" (click)="openUploadForm()" type="button">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M8 3v10M3 8h10"/>
+        </svg>
+        Subir foto
+      </button>
+    }
+  </div>
+
+  <!-- ── Toasts ────────────────────────────────────────────────────────────── -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showUploadForm()) {
+    <div class="toast toast--error" role="alert">{{ error() }}</div>
+  }
+
+  <!-- ── Upload form ───────────────────────────────────────────────────────── -->
+  @if (showUploadForm()) {
+    <div class="upload-panel">
+
+      @if (error()) {
+        <div class="toast toast--error" role="alert">{{ error() }}</div>
+      }
+
+      <!-- Drop zone / file selector -->
+      <label class="drop-zone" [class.drop-zone--has-preview]="!!previewUrl()">
+        @if (previewUrl()) {
+          <img [src]="previewUrl()" alt="Vista previa" class="preview-img"/>
+          <div class="preview-overlay">
+            <span class="preview-change">Cambiar imagen</span>
+          </div>
+        } @else {
+          <div class="drop-zone-content">
+            <span class="drop-icon">🖼️</span>
+            <p class="drop-title">Arrastra una foto o haz clic para seleccionar</p>
+            <p class="drop-hint">JPG, PNG, WEBP — máx. 10 MB</p>
+          </div>
+        }
+        <input
+          type="file"
+          accept="image/*"
+          class="file-input"
+          (change)="onFileSelected($event)"
+          [disabled]="saving()"
+        />
+      </label>
+
+      <!-- Progress bar -->
+      @if (saving() && uploadProgress() > 0) {
+        <div class="progress-wrap" role="progressbar" [attr.aria-valuenow]="uploadProgress()">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+          </div>
+          <span class="progress-label">{{ uploadProgress() }}%</span>
+        </div>
+      }
+
+      <!-- Form fields -->
+      <div class="upload-fields">
+        <div class="form-group">
+          <label for="photoCaption" class="form-label">Descripción</label>
+          <input
+            id="photoCaption"
+            type="text"
+            class="form-input"
+            [(ngModel)]="caption"
+            placeholder="Ej: Primer diente 😁"
+            [disabled]="saving()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="photoDate" class="form-label">Fecha *</label>
+          <input
+            id="photoDate"
+            type="date"
+            class="form-input"
+            [(ngModel)]="date"
+            required
+            [disabled]="saving()"
+          />
+        </div>
+
+        <div class="form-group form-group--full">
+          <label for="photoTags" class="form-label">Etiquetas <span class="form-hint">(separadas por coma)</span></label>
+          <input
+            id="photoTags"
+            type="text"
+            class="form-input"
+            [(ngModel)]="tagsInput"
+            placeholder="Ej: familia, cumpleaños, verano"
+            [disabled]="saving()"
+          />
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="upload-actions">
+        <button class="btn btn--ghost" (click)="cancelUpload()" type="button" [disabled]="saving()">
+          Cancelar
+        </button>
+        <button
+          class="btn btn--primary"
+          (click)="upload()"
+          type="button"
+          [disabled]="saving() || !selectedFile()"
+        >
+          @if (saving()) {
+            <span class="spinner-sm"></span>
+            Subiendo...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v10M3 8h10"/>
+            </svg>
+            Subir foto
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando fotos...</p>
+    </div>
+  } @else {
+
+    <!-- ── Empty state ──────────────────────────────────────────────────────── -->
+    @if (photos().length === 0) {
+      <div class="empty-state">
+        <div class="empty-emoji">📷</div>
+        <p class="empty-title">Sin fotos todavía</p>
+        <p class="empty-sub">Sube la primera foto de tu bebé para guardar este recuerdo.</p>
+      </div>
+    } @else {
+
+      <!-- ── Photo groups by month/year ────────────────────────────────────── -->
+      @for (group of photosByDate(); track group.label) {
+        <section class="photo-group">
+          <h2 class="group-label">{{ group.label }}</h2>
+          <div class="photo-grid">
+            @for (photo of group.photos; track photo.id; let i = $index) {
+              <div class="photo-card" [style.animation-delay]="(i * 40) + 'ms'">
+                <img
+                  [src]="photo.url"
+                  [alt]="photo.caption || 'Foto'"
+                  class="photo-img"
+                  (click)="openLightbox(photo)"
+                  loading="lazy"
+                />
+                <div class="photo-overlay" (click)="openLightbox(photo)">
+                  @if (photo.caption) {
+                    <p class="photo-caption">{{ photo.caption }}</p>
+                  }
+                  <p class="photo-date">{{ formatDate(photo.date) }}</p>
+                </div>
+                <button
+                  class="photo-delete"
+                  (click)="deletePhoto(photo.id)"
+                  type="button"
+                  aria-label="Eliminar foto"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M3 3l10 10M13 3L3 13"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    }
+  }
+</div>
+
+<!-- ── Lightbox ────────────────────────────────────────────────────────────── -->
+@if (lightboxPhoto()) {
+  <div class="lightbox" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Vista ampliada de foto">
+    <div class="lightbox-inner" (click)="$event.stopPropagation()">
+
+      <button class="lightbox-close" (click)="closeLightbox()" type="button" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <img
+        [src]="lightboxPhoto()!.url"
+        [alt]="lightboxPhoto()!.caption || 'Foto'"
+        class="lightbox-img"
+      />
+
+      <div class="lightbox-info">
+        @if (lightboxPhoto()!.caption) {
+          <p class="lightbox-caption">{{ lightboxPhoto()!.caption }}</p>
+        }
+        <p class="lightbox-date">{{ formatDate(lightboxPhoto()!.date) }}</p>
+        @if (lightboxPhoto()!.tags.length > 0) {
+          <div class="lightbox-tags">
+            @for (tag of lightboxPhoto()!.tags; track tag) {
+              <span class="tag">{{ tag }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

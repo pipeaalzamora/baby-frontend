@@ -1,0 +1,415 @@
+<div class="medications-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <span class="pill-emoji">💊</span>
+      </div>
+      <div>
+        <h1 class="page-title">Medicamentos</h1>
+        <p class="page-subtitle">Tratamientos activos</p>
+      </div>
+      <span class="active-badge">{{ activeMeds().length }} activos</span>
+    </div>
+    <button class="btn-add" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo medicamento
+      }
+    </button>
+  </div>
+
+  <!-- Toast success -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showForm()) {
+    <div class="toast toast--error" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  @if (externalError()) {
+    <div class="toast toast--error" role="alert">{{ externalError() }}</div>
+  }
+
+  <div class="external-grid">
+    <section class="external-card">
+      <div class="external-head">
+        <div>
+          <h2>Farmacias MINSAL</h2>
+          <p>{{ pharmacySource()?.name || 'MINSAL Farmanet' }}</p>
+        </div>
+      </div>
+      <div class="external-search">
+        <input type="text" class="form-input" [(ngModel)]="pharmacyComuna" placeholder="Comuna, ej: Maipú"/>
+        <button class="btn btn--confirm" type="button" (click)="searchPharmacies()" [disabled]="loadingPharmacies()">
+          @if (loadingPharmacies()) { Buscando... } @else { Buscar }
+        </button>
+      </div>
+      <div class="external-list">
+        @for (item of pharmacies(); track item.id) {
+          <article class="external-item">
+            <div class="external-item-text">
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.commune }} · {{ item.address }}</span>
+              <small>{{ item.openTime }} - {{ item.closeTime }} · {{ item.phone || 'Sin teléfono' }}</small>
+            </div>
+            <button class="btn-use" type="button" (click)="usePharmacy(item)">Usar farmacia</button>
+          </article>
+        } @empty {
+          <p class="external-empty">Sin resultados para el filtro actual.</p>
+        }
+      </div>
+      @if (pharmacySource()) {
+        <a class="source-link" [href]="pharmacySource()!.url" target="_blank" rel="noopener">Fuente oficial</a>
+      }
+    </section>
+
+    <section class="external-card">
+      <div class="external-head">
+        <div>
+          <h2>Registro ISP</h2>
+          <p>Productos farmacéuticos de venta directa</p>
+        </div>
+      </div>
+      <div class="external-search">
+        <input type="text" class="form-input" [(ngModel)]="medicineSearch" placeholder="Nombre o registro"/>
+        <button class="btn btn--confirm" type="button" (click)="searchMedicineRegistry()" [disabled]="searchingMedicines()">
+          @if (searchingMedicines()) { Buscando... } @else { Consultar }
+        </button>
+      </div>
+      <div class="external-list">
+        @for (item of medicineResults(); track item.registration) {
+          <article class="external-item">
+            <div class="external-item-text">
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.registration }} · {{ item.holder }}</span>
+              <small>{{ item.saleCondition }}</small>
+            </div>
+            <button class="btn-use" type="button" (click)="useMedicine(item)">Usar medicamento</button>
+          </article>
+        } @empty {
+          <p class="external-empty">Busca un medicamento para verificar si aparece en el registro ISP.</p>
+        }
+      </div>
+      @if (medicineSource()) {
+        <a class="source-link" [href]="medicineSource()!.url" target="_blank" rel="noopener">Fuente oficial</a>
+      }
+    </section>
+  </div>
+
+  <!-- Form inline -->
+  @if (showForm()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </div>
+        <h2 class="form-card-title">Nuevo medicamento</h2>
+      </div>
+
+      @if (error()) {
+        <div class="toast toast--error" role="alert">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <!-- Nombre -->
+        <div class="form-group form-group--full">
+          <label for="medName" class="form-label">Nombre del medicamento *</label>
+          <input id="medName" type="text" class="form-input" [(ngModel)]="form.name"
+                 placeholder="Ej: Paracetamol, Amoxicilina..."/>
+        </div>
+
+        @if (form.medicineRegistration || form.medicineHolder || form.saleCondition) {
+          <div class="form-group form-group--full">
+            <div class="selected-info">
+              <strong>Registro ISP seleccionado</strong>
+              @if (form.medicineRegistration) { <span>{{ form.medicineRegistration }}</span> }
+              @if (form.medicineHolder) { <span>{{ form.medicineHolder }}</span> }
+              @if (form.saleCondition) { <span>{{ form.saleCondition }}</span> }
+            </div>
+          </div>
+        }
+
+        <!-- Dosis -->
+        <div class="form-group">
+          <label for="medDosage" class="form-label">Dosis *</label>
+          <input id="medDosage" type="text" class="form-input" [(ngModel)]="form.dosage"
+                 placeholder="Ej: 5ml, 250mg"/>
+        </div>
+
+        <!-- Frecuencia -->
+        <div class="form-group">
+          <label for="medFreq" class="form-label">Frecuencia</label>
+          <select id="medFreq" class="form-input form-select" [(ngModel)]="form.frequencyHours">
+            <option [value]="4">Cada 4 horas</option>
+            <option [value]="6">Cada 6 horas</option>
+            <option [value]="8">Cada 8 horas</option>
+            <option [value]="12">Cada 12 horas</option>
+            <option [value]="24">Cada 24 horas (1 vez al día)</option>
+          </select>
+        </div>
+
+        <!-- Fecha inicio -->
+        <div class="form-group">
+          <label for="medStart" class="form-label">Fecha de inicio *</label>
+          <input id="medStart" type="date" class="form-input" [(ngModel)]="form.startDate" required/>
+        </div>
+
+        <!-- Fecha fin -->
+        <div class="form-group">
+          <label for="medEnd" class="form-label">Fecha de fin <span class="label-optional">(opcional)</span></label>
+          <input id="medEnd" type="date" class="form-input" [(ngModel)]="form.endDate"/>
+        </div>
+
+        <!-- Recetado por -->
+        <div class="form-group">
+          <label for="medDoctor" class="form-label">Recetado por *</label>
+          <input id="medDoctor" type="text" class="form-input" [(ngModel)]="form.prescribedBy"
+                 placeholder="Ej: Dr. García"/>
+        </div>
+
+        <!-- Motivo -->
+        <div class="form-group form-group--full">
+          <label for="medReason" class="form-label">Motivo del tratamiento</label>
+          <textarea id="medReason" class="form-input form-textarea" [(ngModel)]="form.reason"
+                    placeholder="Ej: Infección respiratoria, fiebre, otitis..." rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="medPharmacy" class="form-label">Dónde se compró</label>
+          <input id="medPharmacy" type="text" class="form-input" [(ngModel)]="form.purchasePharmacy"
+                 placeholder="Ej: Farmacia local"/>
+        </div>
+
+        <div class="form-group">
+          <label for="medPharmacyCommune" class="form-label">Comuna farmacia</label>
+          <input id="medPharmacyCommune" type="text" class="form-input" [(ngModel)]="form.purchaseCommune"
+                 placeholder="Ej: Santiago"/>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label for="medPharmacyAddress" class="form-label">Dirección farmacia</label>
+          <input id="medPharmacyAddress" type="text" class="form-input" [(ngModel)]="form.purchaseAddress"
+                 placeholder="Dirección o referencia"/>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="submit()" type="button"
+                [disabled]="saving() || !form.name.trim() || !form.dosage.trim() || !form.startDate || !form.prescribedBy.trim()">
+          @if (saving()) {
+            <span class="spinner-sm"></span>
+            Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Guardar medicamento
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'active'"
+            (click)="setTab('active')" type="button">
+      Activos
+      <span class="tab-count" [class.tab-count--active]="activeTab() === 'active'">
+        {{ activeMeds().length }}
+      </span>
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'all'"
+            (click)="setTab('all')" type="button">
+      Historial
+      <span class="tab-count" [class.tab-count--active]="activeTab() === 'all'">
+        {{ allMeds().length }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando medicamentos...</p>
+    </div>
+  } @else {
+
+    <!-- Lista de medicamentos -->
+    @if (displayedMeds.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          @if (activeTab() === 'active') {
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" fill="rgba(16,185,129,0.08)" stroke="#10b981" stroke-width="1.5"/>
+              <path d="M22 32l8 8 12-16" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" fill="rgba(99,102,241,0.08)" stroke="#6366f1" stroke-width="1.5"/>
+              <path d="M20 32h8l4-8 4 16 4-8h4" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          }
+        </div>
+        <p class="empty-title">
+          @if (activeTab() === 'active') {
+            Sin tratamientos activos
+          } @else {
+            Sin historial de medicamentos
+          }
+        </p>
+        <p class="empty-sub">
+          @if (activeTab() === 'active') {
+            No hay medicamentos activos en este momento. Usa el botón "Nuevo medicamento" para agregar uno.
+          } @else {
+            Aún no se han registrado medicamentos.
+          }
+        </p>
+      </div>
+    } @else {
+      <div class="med-list">
+        @for (med of displayedMeds; track med.id; let i = $index) {
+          <div class="med-card" [class.med-card--active]="med.active" [class.med-card--inactive]="!med.active"
+               [style.animation-delay]="(i * 60) + 'ms'">
+
+            <!-- Status indicator + name row -->
+            <div class="med-header">
+              <div class="med-header-left">
+                <div class="status-dot" [class.status-dot--active]="med.active" [class.status-dot--inactive]="!med.active"></div>
+                <h3 class="med-name">{{ med.name }}</h3>
+                <span class="status-badge" [class.status-badge--active]="med.active" [class.status-badge--inactive]="!med.active">
+                  {{ med.active ? 'ACTIVO' : 'FINALIZADO' }}
+                </span>
+              </div>
+              <div class="med-actions">
+                @if (med.active) {
+                  <button class="btn-action btn-action--finish" (click)="deactivate(med.id)" type="button"
+                          title="Marcar como finalizado">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 8l4 4 6-6"/>
+                    </svg>
+                    Finalizar
+                  </button>
+                }
+                <button class="btn-action btn-action--delete" (click)="deleteMed(med.id)" type="button"
+                        title="Eliminar medicamento">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M2 4h12M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/>
+                    <rect x="3" y="4" width="10" height="9" rx="1.5"/>
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+
+            <!-- Dosis + frecuencia -->
+            <div class="med-dosage-row">
+              <span class="dosage-chip">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <ellipse cx="8" cy="8" rx="6" ry="4" transform="rotate(-45 8 8)"/>
+                  <line x1="3.17" y1="12.83" x2="12.83" y2="3.17"/>
+                </svg>
+                {{ med.dosage }}
+              </span>
+              <span class="freq-chip">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="8" cy="8" r="6"/>
+                  <path d="M8 5v3.5l2 2"/>
+                </svg>
+                {{ formatFrequency(med.frequencyHours) }}
+              </span>
+            </div>
+
+            <!-- Fechas -->
+            <div class="med-dates">
+              <span class="date-item">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="1.5" y="2" width="11" height="10" rx="1.5"/>
+                  <path d="M4.5 1v2M9.5 1v2M1.5 6h11"/>
+                </svg>
+                Inicio: {{ med.startDate | slice:0:10 }}
+              </span>
+              <span class="date-separator">–</span>
+              @if (med.endDate) {
+                <span class="date-item date-item--end">
+                  Fin: {{ med.endDate | slice:0:10 }}
+                </span>
+              } @else {
+                <span class="date-item date-item--ongoing">
+                  En curso
+                </span>
+              }
+            </div>
+
+            <!-- Médico + motivo -->
+            <div class="med-meta">
+              <div class="meta-item">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="8" cy="5" r="3"/>
+                  <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                </svg>
+                <span>{{ med.prescribedBy }}</span>
+              </div>
+              @if (med.reason) {
+                <div class="meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 3H4a1 1 0 00-1 1v9a1 1 0 001 1h8a1 1 0 001-1V4a1 1 0 00-1-1h-2"/>
+                    <rect x="6" y="2" width="4" height="2.5" rx="0.5"/>
+                    <path d="M6 8h4M6 11h2.5"/>
+                  </svg>
+                  <span>{{ med.reason }}</span>
+                </div>
+              }
+              @if (med.purchasePharmacy) {
+                <div class="meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 6h10M4 6l1-3h6l1 3M4 6v7h8V6"/>
+                    <path d="M7 9h2M8 8v2"/>
+                  </svg>
+                  <span>{{ med.purchasePharmacy }}@if (med.purchaseCommune) { · {{ med.purchaseCommune }} }</span>
+                </div>
+              }
+              @if (med.medicineRegistration) {
+                <div class="meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/>
+                    <path d="M5 6h6M5 9h4"/>
+                  </svg>
+                  <span>ISP {{ med.medicineRegistration }}@if (med.saleCondition) { · {{ med.saleCondition }} }</span>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>

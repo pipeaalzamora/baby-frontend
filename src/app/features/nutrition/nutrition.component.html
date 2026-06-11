@@ -117,8 +117,7 @@
     @if (activeTab() === 'guide') {
       <div class="guide-section">
         <p class="guide-intro">
-          Referencia rápida sobre qué alimentos introducir en cada etapa del desarrollo de tu bebé.
-          Siempre consulta con tu pediatra antes de iniciar nuevos alimentos.
+          Referencia rápida basada en Chile Crece Contigo y orientaciones MINSAL. Úsala como apoyo para registrar decisiones tomadas en el control de salud.
         </p>
         <div class="stage-list">
           @for (stage of stageGuide; track stage.stage; let i = $index) {
@@ -139,13 +138,22 @@
           }
         </div>
 
+        <div class="source-panel">
+          @for (source of nutritionSources; track source.url) {
+            <a class="source-pill" [href]="source.url" target="_blank" rel="noopener">
+              <strong>{{ source.name }}</strong>
+              <span>{{ source.note }}</span>
+            </a>
+          }
+        </div>
+
         <div class="guide-tip">
           <div class="tip-icon">
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>
           </div>
-          <p>Introduce un alimento nuevo cada 3-5 días para identificar posibles alergias. Registra las reacciones en la pestaña de Introducciones.</p>
+          <p>Registra nuevos alimentos y reacciones. Evita usar esta guía para diagnosticar alergias o definir dietas especiales sin indicación profesional.</p>
         </div>
       </div>
     }
@@ -154,6 +162,129 @@
     <!-- TAB: RECETAS                                                        -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     @if (activeTab() === 'recipes') {
+      <section class="external-recipes">
+        <div class="external-recipes-head">
+          <div>
+            <h2>Papillas para bebé</h2>
+            <p>Recetas en español para 6 a 10 meses, con medidas simples y textura segura. Para mayores se pueden sumar ideas externas adaptadas.</p>
+          </div>
+          @if (childAgeMonths() !== null) {
+            <button class="age-current-btn" type="button" (click)="setExternalAge(childAgeMonths()!)">
+              Edad actual: {{ ageLabel(childAgeMonths()) }}
+            </button>
+          }
+        </div>
+
+        <div class="external-search-row">
+          <div class="form-group external-query">
+            <label for="externalRecipeQuery" class="form-label">Buscar por alimento o receta</label>
+            <input id="externalRecipeQuery" class="form-input" type="search"
+              [(ngModel)]="externalQuery" (keyup.enter)="searchExternalRecipes()"
+              placeholder="Ej: papilla, zanahoria, zapallo, pollo, lentejas"/>
+          </div>
+          <div class="form-group external-age">
+            <label for="externalRecipeAge" class="form-label">Edad filtro</label>
+            <input id="externalRecipeAge" class="form-input" type="number"
+              [(ngModel)]="externalAgeMonths" min="0" max="72"/>
+            <span class="age-hint">{{ ageLabel(externalAgeMonths) }}</span>
+          </div>
+          <button class="btn btn--confirm external-search-btn" type="button"
+            (click)="searchExternalRecipes()" [disabled]="externalLoading()">
+            @if (externalLoading()) {
+              <span class="spinner-sm"></span> Buscando...
+            } @else {
+              Buscar
+            }
+          </button>
+        </div>
+
+        <div class="quick-age-row" aria-label="Filtros rápidos por edad">
+          @for (age of [6, 7, 8, 9, 10, 12]; track age) {
+            <button class="quick-age-chip" type="button"
+              [class.quick-age-chip--active]="externalAgeMonths === age"
+              (click)="setExternalAge(age)">
+              {{ ageLabel(age) }}
+            </button>
+          }
+        </div>
+
+        @if (externalSource()) {
+          <div class="external-source">
+            <span>{{ externalSource()?.disclaimer }}</span>
+            <a [href]="externalSource()?.url" target="_blank" rel="noopener">{{ externalSource()?.name }}</a>
+          </div>
+        }
+
+        @if (externalError()) {
+          <div class="external-message">{{ externalError() }}</div>
+        }
+
+        @if (externalRecipes().length > 0) {
+          <div class="external-recipe-grid">
+            @for (recipe of externalRecipes(); track recipe.id) {
+              <article class="external-recipe-card">
+                @if (recipe.imageUrl) {
+                  <img class="external-recipe-img" [src]="recipe.imageUrl" [alt]="recipe.name" loading="lazy"/>
+                }
+                <div class="external-recipe-body">
+                  <div class="recipe-badges">
+                    <span class="stage-badge">{{ recipe.stage }}</span>
+                    <span class="texture-badge">{{ recipe.ageLabel }}</span>
+                  </div>
+                  <h3>{{ recipe.name }}</h3>
+                  <div class="external-recipe-meta">
+                    <span>{{ recipe.prepTimeMin }} min estimado</span>
+                    <span>{{ recipe.ingredients.length }} ingredientes</span>
+                    @if (recipe.area) {
+                      <span>{{ recipe.area }}</span>
+                    }
+                  </div>
+
+                  @if (recipe.warnings.length > 0) {
+                    <div class="warning-list">
+                      @for (warning of recipe.warnings | slice:0:2; track warning) {
+                        <span>{{ warning }}</span>
+                      }
+                    </div>
+                  }
+
+                  <details class="recipe-details">
+                    <summary>Ingredientes y preparación</summary>
+                    <div class="external-columns">
+                      <div>
+                        <strong>Ingredientes</strong>
+                        <ul>
+                          @for (ingredient of recipe.ingredients | slice:0:8; track ingredient.name + ingredient.amount) {
+                            <li>{{ ingredient.amount }} {{ ingredient.name }}</li>
+                          }
+                        </ul>
+                      </div>
+                      <div>
+                        <strong>Preparación</strong>
+                        <ol>
+                          @for (step of recipe.steps | slice:0:5; track step) {
+                            <li>{{ step }}</li>
+                          }
+                        </ol>
+                      </div>
+                    </div>
+                  </details>
+
+                  <div class="external-actions">
+                    <button class="btn-mini" type="button" (click)="useExternalRecipe(recipe)">Usar como base</button>
+                    @if (recipe.videoUrl) {
+                      <a class="btn-mini btn-mini--link" [href]="recipe.videoUrl" target="_blank" rel="noopener">Video</a>
+                    }
+                    @if (recipe.sourceUrl) {
+                      <a class="btn-mini btn-mini--link" [href]="recipe.sourceUrl" target="_blank" rel="noopener">Fuente</a>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
 
       <!-- Formulario nueva receta -->
       @if (showRecipeForm()) {
@@ -328,6 +459,36 @@
                   }
                 </div>
               }
+
+              <details class="saved-recipe-details">
+                <summary>Ver ingredientes y preparación</summary>
+                <div class="saved-recipe-columns">
+                  <div>
+                    <strong>Ingredientes</strong>
+                    @if (recipe.ingredients.length > 0) {
+                      <ul>
+                        @for (ingredient of recipe.ingredients; track ingredient.name + ingredient.amount) {
+                          <li>{{ ingredient.amount }} {{ ingredient.name }}</li>
+                        }
+                      </ul>
+                    } @else {
+                      <p>Sin ingredientes guardados.</p>
+                    }
+                  </div>
+                  <div>
+                    <strong>Preparación</strong>
+                    @if (recipe.steps.length > 0) {
+                      <ol>
+                        @for (step of recipe.steps; track step) {
+                          <li>{{ step }}</li>
+                        }
+                      </ol>
+                    } @else {
+                      <p>Sin pasos guardados.</p>
+                    }
+                  </div>
+                </div>
+              </details>
             </div>
           }
         </div>

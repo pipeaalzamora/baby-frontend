@@ -1,0 +1,345 @@
+<div class="diary-page">
+
+  <!-- ─── Header ──────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <path d="M8 7h8M8 11h6"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Diario</h1>
+        <p class="page-subtitle">Registro diario del bebé</p>
+      </div>
+    </div>
+    <button class="btn-add" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nueva entrada
+      }
+    </button>
+  </div>
+
+  <!-- ─── Toasts ───────────────────────────────────────────────────────────── -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showForm()) {
+    <div class="toast toast--error" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- ─── Form card ─────────────────────────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </div>
+        <h2 class="form-card-title">Nueva entrada</h2>
+      </div>
+
+      @if (error()) {
+        <div class="toast toast--error" role="alert">{{ error() }}</div>
+      }
+
+      <!-- Type selector -->
+      <div class="type-selector">
+        @for (t of ['feeding','sleep','diaper','mood','note']; track t) {
+          <button
+            class="type-btn"
+            [class.type-btn--active]="form.type === t"
+            [style.--type-color]="getTypeConfig(t).color"
+            [style.--type-bg]="getTypeConfig(t).bg"
+            [style.--type-border]="getTypeConfig(t).border"
+            (click)="setType($any(t))"
+            type="button">
+            <span class="type-emoji">{{ getTypeConfig(t).emoji }}</span>
+            <span class="type-label">{{ getTypeConfig(t).label }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Dynamic fields -->
+      <div class="dynamic-fields">
+
+        <!-- FEEDING -->
+        @if (form.type === 'feeding') {
+          <div class="form-group form-group--full">
+            <label class="form-label">Modo de alimentación</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" [class.toggle-btn--active]="form.feedingMode === 'breast'"
+                      (click)="form.feedingMode = 'breast'" type="button">🤱 Pecho</button>
+              <button class="toggle-btn" [class.toggle-btn--active]="form.feedingMode === 'bottle'"
+                      (click)="form.feedingMode = 'bottle'" type="button">🍼 Biberón</button>
+              <button class="toggle-btn" [class.toggle-btn--active]="form.feedingMode === 'food'"
+                      (click)="form.feedingMode = 'food'" type="button">🥣 Sólido</button>
+            </div>
+          </div>
+
+          @if (form.feedingMode === 'breast') {
+            <div class="form-group form-group--full">
+              <label class="form-label">Lado</label>
+              <div class="toggle-group">
+                <button class="toggle-btn" [class.toggle-btn--active]="form.breast === 'left'"
+                        (click)="form.breast = 'left'" type="button">← Izquierdo</button>
+                <button class="toggle-btn" [class.toggle-btn--active]="form.breast === 'right'"
+                        (click)="form.breast = 'right'" type="button">Derecho →</button>
+                <button class="toggle-btn" [class.toggle-btn--active]="form.breast === 'both'"
+                        (click)="form.breast = 'both'" type="button">↔ Ambos</button>
+              </div>
+            </div>
+          }
+
+          @if (form.feedingMode === 'bottle') {
+            <div class="form-group">
+              <label for="bottleMl" class="form-label">Cantidad (ml)</label>
+              <input id="bottleMl" type="number" class="form-input" [(ngModel)]="form.bottleMl"
+                     placeholder="Ej: 120" min="0" max="500"/>
+            </div>
+          }
+
+          @if (form.feedingMode === 'food') {
+            <div class="form-group form-group--full">
+              <label for="food" class="form-label">Alimento</label>
+              <input id="food" type="text" class="form-input" [(ngModel)]="form.food"
+                     placeholder="Ej: Puré de zanahoria"/>
+            </div>
+          }
+        }
+
+        <!-- SLEEP -->
+        @if (form.type === 'sleep') {
+          <div class="form-group">
+            <label for="sleepStart" class="form-label">Hora inicio</label>
+            <input id="sleepStart" type="datetime-local" class="form-input" [(ngModel)]="form.sleepStart"/>
+          </div>
+          <div class="form-group">
+            <label for="sleepEnd" class="form-label">Hora fin</label>
+            <input id="sleepEnd" type="datetime-local" class="form-input" [(ngModel)]="form.sleepEnd"/>
+          </div>
+          <div class="form-group form-group--full">
+            <label class="form-label">Calidad</label>
+            <div class="toggle-group">
+              <button class="toggle-btn toggle-btn--green" [class.toggle-btn--active]="form.sleepQuality === 'good'"
+                      (click)="form.sleepQuality = 'good'" type="button">😴 Bueno</button>
+              <button class="toggle-btn toggle-btn--amber" [class.toggle-btn--active]="form.sleepQuality === 'fair'"
+                      (click)="form.sleepQuality = 'fair'" type="button">😐 Regular</button>
+              <button class="toggle-btn toggle-btn--red" [class.toggle-btn--active]="form.sleepQuality === 'poor'"
+                      (click)="form.sleepQuality = 'poor'" type="button">😩 Malo</button>
+            </div>
+          </div>
+        }
+
+        <!-- DIAPER -->
+        @if (form.type === 'diaper') {
+          <div class="form-group form-group--full">
+            <label class="form-label">Tipo</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" [class.toggle-btn--active]="form.diaperType === 'wet'"
+                      (click)="form.diaperType = 'wet'" type="button">💧 Mojado</button>
+              <button class="toggle-btn" [class.toggle-btn--active]="form.diaperType === 'dirty'"
+                      (click)="form.diaperType = 'dirty'" type="button">💩 Sucio</button>
+              <button class="toggle-btn" [class.toggle-btn--active]="form.diaperType === 'mixed'"
+                      (click)="form.diaperType = 'mixed'" type="button">🔄 Mixto</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="diaperColor" class="form-label">Color (opcional)</label>
+            <input id="diaperColor" type="text" class="form-input" [(ngModel)]="form.diaperColor"
+                   placeholder="Ej: amarillo, verdoso..."/>
+          </div>
+        }
+
+        <!-- MOOD -->
+        @if (form.type === 'mood') {
+          <div class="form-group form-group--full">
+            <label class="form-label">Humor ({{ form.moodLevel }}/5)</label>
+            <div class="mood-scale">
+              @for (lvl of [1,2,3,4,5]; track lvl) {
+                <button
+                  class="mood-btn"
+                  [class.mood-btn--active]="form.moodLevel === lvl"
+                  (click)="form.moodLevel = lvl"
+                  type="button"
+                  [attr.aria-label]="'Humor nivel ' + lvl">
+                  {{ moodEmojis[lvl - 1] }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="form-group form-group--full">
+            <label for="moodDesc" class="form-label">Descripción (opcional)</label>
+            <input id="moodDesc" type="text" class="form-input" [(ngModel)]="form.moodDesc"
+                   placeholder="Ej: Muy activo, llorón por la tarde..."/>
+          </div>
+        }
+
+        <!-- NOTE -->
+        @if (form.type === 'note') {
+          <div class="form-group form-group--full">
+            <label for="noteText" class="form-label">Texto *</label>
+            <textarea id="noteText" class="form-input form-textarea" [(ngModel)]="form.noteText"
+                      placeholder="Escribe tu nota aquí..." rows="4"></textarea>
+          </div>
+        }
+
+      </div>
+
+      <!-- Common fields -->
+      <div class="common-fields">
+        <div class="form-group">
+          <label for="entryDate" class="form-label">Fecha y hora *</label>
+          <input id="entryDate" type="datetime-local" class="form-input" [(ngModel)]="form.date" required/>
+        </div>
+        <div class="form-group">
+          <label for="entryNotes" class="form-label">Notas adicionales</label>
+          <input id="entryNotes" type="text" class="form-input" [(ngModel)]="form.notes"
+                 placeholder="Observaciones opcionales..."/>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="form-footer">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="submit()" type="button" [disabled]="saving() || !form.date">
+          @if (saving()) {
+            <span class="spinner-sm"></span> Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Guardar entrada
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Tabs ──────────────────────────────────────────────────────────────── -->
+  <div class="tabs-row">
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'all'"
+            (click)="setTab('all')" type="button">
+      📋 Todos
+    </button>
+    @for (t of ['feeding','sleep','diaper','mood','note']; track t) {
+      <button class="tab-btn"
+              [class.tab-btn--active]="activeTab() === t"
+              [style.--tab-color]="getTypeConfig(t).color"
+              (click)="setTab($any(t))"
+              type="button">
+        {{ getTypeConfig(t).emoji }} {{ getTypeConfig(t).label }}
+      </button>
+    }
+  </div>
+
+  <!-- ─── Loading ──────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando diario...</p>
+    </div>
+  } @else {
+
+    <!-- ─── Empty state ─────────────────────────────────────────────────────── -->
+    @if (groupedByDate().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="28" fill="rgba(99,102,241,0.08)" stroke="#6366f1" stroke-width="1.5"/>
+            <path d="M20 44.5A2.5 2.5 0 0 1 22.5 42H44" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M22.5 19H44v26H22.5A2.5 2.5 0 0 1 20 42.5v-21A2.5 2.5 0 0 1 22.5 19z" stroke="#6366f1" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M27 27h12M27 32h8" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">Sin entradas en el diario</p>
+        <p class="empty-sub">
+          @if (activeTab() === 'all') {
+            Pulsa "Nueva entrada" para empezar a registrar el día a día.
+          } @else {
+            No hay entradas de tipo "{{ activeTabLabel() }}" todavía.
+          }
+        </p>
+      </div>
+    } @else {
+
+      <!-- ─── Grouped list ──────────────────────────────────────────────────── -->
+      <div class="diary-list">
+        @for (group of groupedByDate(); track group.date; let gi = $index) {
+          <div class="date-group" [style.animation-delay]="(gi * 50) + 'ms'">
+
+            <!-- Date header -->
+            <div class="date-header">
+              <span class="date-label">{{ formatDateLabel(group.date) }}</span>
+              <span class="date-count">{{ group.items.length }} {{ group.items.length === 1 ? 'entrada' : 'entradas' }}</span>
+            </div>
+
+            <!-- Entry cards -->
+            <div class="entries-grid">
+              @for (entry of group.items; track entry.id; let i = $index) {
+                <div class="entry-card"
+                     [style.--entry-color]="typeConfig[entry.type].color"
+                     [style.--entry-bg]="typeConfig[entry.type].bg"
+                     [style.--entry-border]="typeConfig[entry.type].border"
+                     [style.animation-delay]="(gi * 50 + i * 40) + 'ms'">
+
+                  <!-- Card left: icon + info -->
+                  <div class="entry-main">
+                    <div class="entry-icon">
+                      {{ typeConfig[entry.type].emoji }}
+                    </div>
+                    <div class="entry-info">
+                      <div class="entry-top-row">
+                        <span class="entry-type-label">{{ typeConfig[entry.type].label }}</span>
+                        <span class="entry-time">{{ formatTime(entry.date) }}</span>
+                      </div>
+                      <p class="entry-summary">{{ getSummary(entry) }}</p>
+                      @if (entry.notes) {
+                        <p class="entry-notes">{{ entry.notes }}</p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Delete button -->
+                  <button class="btn-delete" (click)="delete(entry.id)" type="button" aria-label="Eliminar entrada">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 4h12M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/>
+                    </svg>
+                  </button>
+
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+
+    }
+  }
+
+</div>

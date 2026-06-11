@@ -27,6 +27,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(m => m.ProfileComponent),
+      },
+      {
         path: 'vaccines',
         loadComponent: () =>
           import('./features/vaccines/vaccines.component').then(m => m.VaccinesComponent),
@@ -45,6 +50,26 @@ export const routes: Routes = [
         path: 'nutrition',
         loadComponent: () =>
           import('./features/nutrition/nutrition.component').then(m => m.NutritionComponent),
+      },
+      {
+        path: 'medications',
+        loadComponent: () =>
+          import('./features/medications/medications.component').then(m => m.MedicationsComponent),
+      },
+      {
+        path: 'milestones',
+        loadComponent: () =>
+          import('./features/milestones/milestones.component').then(m => m.MilestonesComponent),
+      },
+      {
+        path: 'photos',
+        loadComponent: () =>
+          import('./features/photos/photos.component').then(m => m.PhotosComponent),
+      },
+      {
+        path: 'diary',
+        loadComponent: () =>
+          import('./features/diary/diary.component').then(m => m.DiaryComponent),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

@@ -1,0 +1,289 @@
+<div class="milestones-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <span class="header-emoji">⭐</span>
+      </div>
+      <div>
+        <h1 class="page-title">Hitos</h1>
+        <p class="page-subtitle">Desarrollo de tu bebé</p>
+      </div>
+    </div>
+    <button class="btn-add" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nuevo hito
+      }
+    </button>
+  </div>
+
+  <!-- Toast success -->
+  @if (success()) {
+    <div class="toast toast--success" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  @if (error() && !showForm()) {
+    <div class="toast toast--error" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Form colapsable -->
+  @if (showForm()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">⭐</div>
+        <h2 class="form-card-title">Nuevo hito</h2>
+      </div>
+
+      @if (error()) {
+        <div class="toast toast--error" role="alert">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <!-- Categoría -->
+        <div class="form-group">
+          <label for="category" class="form-label">Categoría *</label>
+          <select id="category" class="form-input form-select" [(ngModel)]="form.category"
+                  [style.border-left-color]="categoryConfig[form.category].color">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">
+                {{ categoryConfig[cat].icon }} {{ categoryConfig[cat].label }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Fecha -->
+        <div class="form-group">
+          <label for="date" class="form-label">Fecha *</label>
+          <input id="date" type="date" class="form-input" [(ngModel)]="form.date" required/>
+        </div>
+
+        <!-- Título -->
+        <div class="form-group form-group--full">
+          <label for="title" class="form-label">Título *</label>
+          <input id="title" type="text" class="form-input" [(ngModel)]="form.title"
+                 placeholder="Ej: Primera vez que se sentó solo" required/>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group form-group--full">
+          <label for="description" class="form-label">Descripción</label>
+          <textarea id="description" class="form-input form-textarea" [(ngModel)]="form.description"
+                    placeholder="Cuéntanos más sobre este logro especial..." rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="submit()" type="button"
+                [disabled]="saving() || !form.title.trim() || !form.date">
+          @if (saving()) {
+            <span class="spinner-sm"></span>
+            Guardando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l4 4 6-6"/>
+            </svg>
+            Guardar hito
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <section class="advice-panel">
+    <div class="advice-head">
+      <div>
+        <h2>Consejos por edad</h2>
+        <p>Referencia rápida sobre desarrollo, dientes, alimentación y pañales. Úsala como apoyo para conversar en controles.</p>
+      </div>
+      <div class="advice-age-control">
+        <label for="adviceAge" class="form-label">Edad</label>
+        <div class="advice-age-row">
+          <input id="adviceAge" class="form-input" type="number" min="0" max="60"
+                 [(ngModel)]="adviceAgeMonths" (keyup.enter)="selectAdviceAge(adviceAgeMonths)"/>
+          <button class="btn btn--confirm btn--compact" type="button" (click)="selectAdviceAge(adviceAgeMonths)">
+            Ver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="advice-months">
+      @for (age of [6, 9, 12, 18, 24, 30, 36]; track age) {
+        <button class="month-chip" type="button"
+                [class.month-chip--active]="advice()?.ageMonths === age"
+                (click)="selectAdviceAge(age)">
+          {{ age < 12 ? age + 'm' : (age / 12) + 'a' }}
+        </button>
+      }
+    </div>
+
+    @if (adviceLoading()) {
+      <div class="advice-loading">Cargando consejos...</div>
+    } @else if (advice()) {
+      <div class="advice-summary">
+        <strong>{{ advice()?.ageLabel }}</strong>
+        <span>{{ advice()?.summary }}</span>
+      </div>
+
+      <div class="advice-grid">
+        @for (section of advice()?.sections; track section.id) {
+          <article class="advice-card">
+            <div class="advice-card-head">
+              <span class="advice-category">{{ section.category }}</span>
+              <h3>{{ section.title }}</h3>
+            </div>
+            <ul class="advice-list">
+              @for (item of section.items; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+            @if (section.tips.length > 0) {
+              <div class="advice-tips">
+                @for (tip of section.tips; track tip) {
+                  <span>{{ tip }}</span>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+
+      @if (advice()?.redFlags?.length) {
+        <div class="red-flags">
+          <strong>Consultar si notas:</strong>
+          <ul>
+            @for (flag of advice()?.redFlags; track flag) {
+              <li>{{ flag }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="advice-sources">
+        @for (source of advice()?.sources; track source.url) {
+          <a [href]="source.url" target="_blank" rel="noopener">{{ source.name }}</a>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader">
+        <span></span><span></span><span></span>
+      </div>
+      <p>Cargando hitos...</p>
+    </div>
+  } @else {
+
+    <!-- Filter pills -->
+    <div class="filter-pills">
+      <button class="filter-pill"
+              [class.filter-pill--active]="activeCategory() === 'all'"
+              (click)="setCategory('all')" type="button">
+        <span class="pill-icon">🌟</span>
+        <span>Todos</span>
+        <span class="pill-count">{{ milestones().length }}</span>
+      </button>
+
+      @for (cat of categories; track cat) {
+        <button class="filter-pill"
+                [class.filter-pill--active]="activeCategory() === cat"
+                [style.--pill-color]="categoryConfig[cat].color"
+                (click)="setCategory(cat)" type="button">
+          <span class="pill-icon">{{ categoryConfig[cat].icon }}</span>
+          <span>{{ categoryConfig[cat].label }}</span>
+          @if (countByCategory(cat) > 0) {
+            <span class="pill-count">{{ countByCategory(cat) }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <!-- Empty state -->
+    @if (filteredMilestones().length === 0) {
+      <div class="empty-state">
+        <div class="empty-emoji">🌱</div>
+        <p class="empty-title">
+          @if (activeCategory() === 'all') {
+            Sin hitos registrados
+          } @else {
+            Sin hitos en esta categoría
+          }
+        </p>
+        <p class="empty-sub">¡Cada logro cuenta! Registra los primeros pasos de tu bebé</p>
+      </div>
+    } @else {
+      <!-- Milestones grid -->
+      <div class="milestones-grid">
+        @for (m of filteredMilestones(); track m.id; let i = $index) {
+          <div class="milestone-card"
+               [style.--card-color]="categoryConfig[m.category].color"
+               [style.animation-delay]="(i * 50) + 'ms'">
+
+            <!-- Badge -->
+            <div class="card-top">
+              <span class="category-badge"
+                    [style.background]="categoryConfig[m.category].color + '22'"
+                    [style.color]="categoryConfig[m.category].color"
+                    [style.border-color]="categoryConfig[m.category].color + '44'">
+                {{ categoryConfig[m.category].icon }} {{ categoryConfig[m.category].label }}
+              </span>
+              <button class="delete-btn"
+                      (click)="deleteMilestone(m.id)"
+                      type="button"
+                      aria-label="Eliminar hito">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Emoji grande -->
+            <div class="card-emoji">{{ categoryConfig[m.category].icon }}</div>
+
+            <!-- Contenido -->
+            <div class="card-body">
+              <h3 class="card-title">{{ m.title }}</h3>
+              @if (m.description) {
+                <p class="card-description">{{ m.description }}</p>
+              }
+              <div class="card-date">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="1.5" y="2" width="11" height="10" rx="1.5"/>
+                  <path d="M4.5 1v2M9.5 1v2M1.5 6h11"/>
+                </svg>
+                {{ formatDate(m.date) }}
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>

@@ -1,7 +1,45 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Recipe, FoodIntroduction } from '../models/models';
+import { Recipe, FoodIntroduction, RecipeIngredient } from '../models/models';
+
+export interface RecipeSourceInfo {
+  name: string;
+  url: string;
+  fetchedAt: string;
+  disclaimer?: string;
+}
+
+export interface ExternalRecipe {
+  id: string;
+  name: string;
+  provider?: string;
+  category?: string;
+  area?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  sourceUrl?: string;
+  minAgeMonths: number;
+  ageLabel: string;
+  stage: string;
+  texture: string;
+  prepTimeMin: number;
+  ingredients: RecipeIngredient[];
+  steps: string[];
+  warnings: string[];
+  tags: string[];
+}
+
+export interface ExternalRecipeResponse {
+  source: RecipeSourceInfo;
+  query: string;
+  translatedQuery?: string;
+  ageMonths: number;
+  ageLabel: string;
+  mode: string;
+  count: number;
+  items: ExternalRecipe[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class RecipeService {
@@ -18,6 +56,14 @@ export class RecipeService {
 
   toggleFavorite(id: string, isFavorite: boolean) {
     return this.http.patch<Recipe>(`${this.base}/${id}/favorite`, { isFavorite });
+  }
+
+  searchExternalRecipes(query: string, ageMonths: number, limit = 8) {
+    const params = new HttpParams()
+      .set('q', query)
+      .set('ageMonths', String(ageMonths))
+      .set('limit', String(limit));
+    return this.http.get<ExternalRecipeResponse>(`${this.base}/search-external`, { params });
   }
 
   listIntroductions() {

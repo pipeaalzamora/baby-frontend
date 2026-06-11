@@ -16,6 +16,10 @@ export class CheckupService {
     return this.http.post<Checkup>(this.base, data);
   }
 
+  patch(id: string, data: Partial<Checkup>) {
+    return this.http.patch<Checkup>(`${this.base}/${id}`, data);
+  }
+
   delete(id: string) {
     return this.http.delete<{ ok: boolean }>(`${this.base}/${id}`);
   }

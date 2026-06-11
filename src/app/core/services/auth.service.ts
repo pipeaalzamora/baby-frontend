@@ -1,9 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
+import { firstValueFrom, from } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { AuthUser, AuthResponse } from '../models/models';
+import { AuthUser } from '../models/models';
+import { FirebaseService } from './firebase.service';
 
 const TOKEN_KEY = 'baby_token';
 const USER_KEY = 'baby_user';
@@ -12,6 +14,7 @@ const USER_KEY = 'baby_user';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private firebase = inject(FirebaseService);
 
   private _user = signal<AuthUser | null>(this.loadUser());
   private _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
@@ -20,27 +23,48 @@ export class AuthService {
   readonly token = this._token.asReadonly();
   readonly isLoggedIn = computed(() => !!this._token());
 
-  /** Sends the Google credential (ID token) to our backend for verification */
-  loginWithGoogle(credential: string) {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/google`, { credential })
-      .pipe(
-        tap((res) => {
-          this.saveSession(res.token, res.user);
-        })
-      );
+  loginWithGoogle() {
+    return from(this.firebase.signInWithGoogle()).pipe(
+      switchMap((firebaseUser) => from(firebaseUser.getIdToken())),
+      tap((token) => this.saveToken(token)),
+      switchMap(() => this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`)),
+      tap((user) => this.saveUser(user)),
+    );
   }
 
   logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    this._token.set(null);
-    this._user.set(null);
+    this.clearSession();
+    void this.firebase.signOut();
     this.router.navigate(['/login']);
   }
 
-  getToken(): string | null {
-    return this._token();
+  async getFreshToken(): Promise<string | null> {
+    const token = await this.firebase.getIdToken();
+    if (token) {
+      this.saveToken(token);
+      return token;
+    }
+    return null;
+  }
+
+  async restoreSession(): Promise<boolean> {
+    const token = await this.getFreshToken();
+    if (!token) {
+      this.clearSession();
+      return false;
+    }
+
+    if (!this._user()) {
+      try {
+        const user = await firstValueFrom(this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`));
+        this.saveUser(user);
+      } catch {
+        this.clearSession();
+        return false;
+      }
+    }
+
+    return true;
   }
 
   updateChildId(childId: string) {
@@ -52,11 +76,21 @@ export class AuthService {
     }
   }
 
-  private saveSession(token: string, user: AuthUser) {
+  private saveToken(token: string) {
     localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
     this._token.set(token);
+  }
+
+  private saveUser(user: AuthUser) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
     this._user.set(user);
+  }
+
+  private clearSession() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    this._token.set(null);
+    this._user.set(null);
   }
 
   private loadUser(): AuthUser | null {

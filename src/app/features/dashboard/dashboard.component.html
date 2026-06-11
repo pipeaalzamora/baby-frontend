@@ -1,6 +1,3 @@
-<!-- Canvas SIEMPRE en el DOM para que ViewChild funcione desde ngAfterViewInit -->
-<canvas #canvas3d class="canvas3d canvas3d--hidden"></canvas>
-
 @if (loading()) {
   <div class="loading-page">
     <div class="pulse-ring"></div>
@@ -52,33 +49,33 @@
         </div>
       </div>
 
-      <!-- 3D model card -->
-      <div class="model-card">
-        @if (!modelReady()) {
-          <div class="model-loading">
-            <div class="ring-progress">
-              <svg viewBox="0 0 56 56">
-                <circle class="ring-bg" cx="28" cy="28" r="22"/>
-                <circle class="ring-fg" cx="28" cy="28" r="22"
-                  [style.stroke-dashoffset]="138.2 - (138.2 * modelProgress() / 100)"/>
+      <a routerLink="/photos" class="memory-card" aria-label="Ver fotos">
+        @if (latestPhoto()) {
+          <img
+            [src]="latestPhoto()!.url"
+            [alt]="latestPhoto()!.caption || 'Foto de ' + (child()?.name ?? 'tu bebé')"
+            class="memory-img"
+            loading="lazy"
+          />
+          <div class="memory-overlay">
+            <span class="memory-kicker">{{ latestPhotoLabel }}</span>
+            <strong>{{ latestPhoto()!.caption || 'Último recuerdo' }}</strong>
+            <span>{{ photoCount() }} {{ photoCount() === 1 ? 'foto' : 'fotos' }}</span>
+          </div>
+        } @else {
+          <div class="memory-empty">
+            <div class="memory-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
               </svg>
-              <span>{{ modelProgress() }}%</span>
             </div>
-            <p>Cargando modelo...</p>
+            <span class="memory-kicker">Fotos</span>
+            <strong>Guarda tus primeros recuerdos</strong>
+            <span>Ver galería</span>
           </div>
         }
-        <!-- Canvas real movido aquí visualmente con JS, el elemento DOM está arriba -->
-        <div class="canvas-slot" #canvasSlot></div>
-        @if (modelReady()) {
-          <div class="model-hint">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="8" cy="8" r="6.5"/>
-              <path d="M5.5 8h5M8 5.5v5"/>
-            </svg>
-            Arrastra · Zoom
-          </div>
-        }
-      </div>
+      </a>
     </div>
 
     <!-- ── Stats ─────────────────────────────────────────────────────────── -->

@@ -51,6 +51,73 @@
     </div>
   }
 
+  @if (externalError()) {
+    <div class="toast toast--error" role="alert">{{ externalError() }}</div>
+  }
+
+  <div class="health-grid">
+    <section class="health-card">
+      <div class="health-head">
+        <div>
+          <h2>Controles sugeridos</h2>
+          <p>Chile Crece Contigo y control de salud del niño o niña</p>
+        </div>
+      </div>
+      <div class="guide-rows">
+        @for (item of controlGuide; track item.age) {
+          <article class="guide-row" [class.guide-row--done]="isSuggestedCompleted(item)">
+            <div class="guide-row-text">
+              <strong>{{ item.age }}</strong>
+              <span>{{ item.focus }}</span>
+            </div>
+            <button class="guide-complete-btn" type="button"
+                    [class.guide-complete-btn--done]="isSuggestedCompleted(item)"
+                    [disabled]="saving()"
+                    (click)="toggleSuggestedControl(item)">
+              @if (isSuggestedCompleted(item)) {
+                Completado
+              } @else {
+                Marcar completado
+              }
+            </button>
+          </article>
+        }
+      </div>
+      <a class="source-link" href="https://www.crececontigo.gob.cl/beneficios/fortalecimiento-del-control-de-salud-del-nino-o-nina" target="_blank" rel="noopener">
+        Fuente Chile Crece Contigo
+      </a>
+    </section>
+
+    <section class="health-card">
+      <div class="health-head">
+        <div>
+          <h2>Buscar centro de salud</h2>
+          <p>{{ healthSource()?.name || 'DEIS/MINSAL' }}</p>
+        </div>
+      </div>
+      <div class="external-search">
+        <input type="text" class="form-input" [(ngModel)]="centerSearch" placeholder="CESFAM, comuna o nombre"/>
+        <button class="btn btn--primary" type="button" (click)="searchCenters()" [disabled]="loadingCenters()">
+          @if (loadingCenters()) { Buscando... } @else { Buscar }
+        </button>
+      </div>
+      <div class="center-list">
+        @for (center of healthCenters(); track center.code) {
+          <article class="center-item">
+            <strong>{{ center.name }}</strong>
+            <span>{{ center.type }} · {{ center.commune }}, {{ center.region }}</span>
+            <small>{{ center.address }} · Urgencia: {{ center.hasEmergency }}</small>
+          </article>
+        } @empty {
+          <p class="center-empty">Sin resultados para el filtro actual.</p>
+        }
+      </div>
+      @if (healthSource()) {
+        <a class="source-link" [href]="healthSource()!.url" target="_blank" rel="noopener">Fuente oficial</a>
+      }
+    </section>
+  </div>
+
   <!-- Form colapsable -->
   @if (showForm()) {
     <div class="form-card">
@@ -230,6 +297,11 @@
                     <path d="M4.5 1v2M9.5 1v2M1.5 6h11"/>
                   </svg>
                   Próxima: {{ c.nextAppointment | slice:0:10 }}
+                </div>
+              }
+              @if (c.status === 'completed') {
+                <div class="next-appt-badge next-appt-badge--done">
+                  Completado@if (c.completedAt) { · {{ c.completedAt | slice:0:10 }} }
                 </div>
               }
             </div>

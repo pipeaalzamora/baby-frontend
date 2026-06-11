@@ -6,7 +6,7 @@ import { catchError, map, of } from 'rxjs';
 
 /**
  * Redirige a /setup si el usuario aún no tiene perfil de bebé.
- * Optimización: si el JWT ya contiene childId, no hace llamada a la API.
+ * Optimización: si la sesión local ya contiene childId, no hace llamada a la API.
  */
 export const childGuard: CanActivateFn = () => {
   const auth     = inject(AuthService);

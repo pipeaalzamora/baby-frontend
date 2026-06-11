@@ -34,6 +34,25 @@
     <div class="toast toast--error" role="alert">{{ error() }}</div>
   }
 
+  <section class="source-card">
+    <div>
+      <h2>Calendario local PNI</h2>
+      <p>
+        @if (scheduleSource()) {
+          {{ scheduleSource()!.version }} · {{ scheduleSource()!.source }}
+        } @else {
+          Basado en el Calendario del Programa Nacional de Inmunizaciones 2026.
+        }
+      </p>
+    </div>
+    <div class="source-actions">
+      <button class="btn-seed" type="button" (click)="seedLocalSchedule()" [disabled]="seeding()">
+        @if (seeding()) { Creando... } @else { Crear/actualizar calendario }
+      </button>
+      <a href="https://vacunas.minsal.cl/calendarios-de-vacunacion/" target="_blank" rel="noopener">Fuente PNI</a>
+    </div>
+  </section>
+
   @if (loading()) {
     <div class="loading-state">
       <div class="dots-loader">
@@ -61,6 +80,11 @@
             </svg>
           </div>
           <p>¡Todo al día! No hay vacunas pendientes.</p>
+          @if (vaccines().length === 0) {
+            <button class="btn-seed btn-seed--inline" type="button" (click)="seedLocalSchedule()" [disabled]="seeding()">
+              @if (seeding()) { Creando calendario... } @else { Crear calendario local PNI }
+            </button>
+          }
         </div>
       } @else {
         <div class="vaccine-grid">
@@ -181,6 +205,35 @@
           <div class="form-group">
             <label for="batchLot" class="form-label">Lote / Serie</label>
             <input id="batchLot" type="text" class="form-input" [(ngModel)]="form.batchLot" placeholder="Ej: ABC123"/>
+          </div>
+          <div class="form-group form-group--full">
+            <label for="centerSearch" class="form-label">Buscar centro DEIS/MINSAL</label>
+            <div class="center-search-row">
+              <input id="centerSearch" type="text" class="form-input" [(ngModel)]="centerSearch"
+                     (keyup.enter)="searchHealthCenters()" placeholder="CESFAM, comuna o nombre"/>
+              <button class="btn btn--ghost" type="button" (click)="searchHealthCenters()" [disabled]="loadingCenters()">
+                @if (loadingCenters()) { Buscando... } @else { Buscar }
+              </button>
+            </div>
+            @if (centerError()) {
+              <div class="center-error">{{ centerError() }}</div>
+            }
+            <div class="center-results">
+              @for (center of healthCenters(); track center.code) {
+                <button class="center-result" type="button" (click)="useHealthCenter(center)">
+                  <strong>{{ center.name }}</strong>
+                  <span>{{ center.type }} · {{ center.commune }}, {{ center.region }}</span>
+                  @if (center.address) {
+                    <small>{{ center.address }}</small>
+                  }
+                </button>
+              } @empty {
+                <p>Busca un CESFAM, comuna o establecimiento para seleccionar el lugar de administración.</p>
+              }
+            </div>
+            @if (healthSource()) {
+              <a class="modal-source-link" [href]="healthSource()!.url" target="_blank" rel="noopener">Fuente oficial DEIS/MINSAL</a>
+            }
           </div>
           <div class="form-group form-group--full">
             <label for="reactions" class="form-label">Reacciones observadas</label>

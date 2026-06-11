@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
-import { RecipeService } from '../../core/services/recipe.service';
+import { ExternalRecipe, RecipeSourceInfo, RecipeService } from '../../core/services/recipe.service';
 import { Recipe, FoodIntroduction, RecipeIngredient } from '../../core/models/models';
 import { forkJoin } from 'rxjs';
+import { ChildService } from '../../core/services/child.service';
 
 interface RecipeForm {
   name: string;
@@ -31,6 +32,7 @@ interface IntroForm {
 })
 export class NutritionComponent implements OnInit {
   private svc = inject(RecipeService);
+  private childSvc = inject(ChildService);
 
   activeTab = signal<'guide' | 'recipes' | 'introductions'>('guide');
 
@@ -42,42 +44,73 @@ export class NutritionComponent implements OnInit {
   success       = signal<string | null>(null);
   showRecipeForm = signal(false);
   showIntroForm  = signal(false);
+  externalRecipes = signal<ExternalRecipe[]>([]);
+  externalSource  = signal<RecipeSourceInfo | null>(null);
+  externalLoading = signal(false);
+  externalSearched = signal(false);
+  externalError   = signal<string | null>(null);
+
+  externalQuery = 'papilla';
+  externalAgeMonths = 8;
+
+  readonly childAgeMonths = computed(() => {
+    const birthDate = this.childSvc.activeChild()?.birthDate;
+    return birthDate ? this.monthsSinceBirth(birthDate) : null;
+  });
 
   readonly stageGuide = [
     {
       stage: '0-6m',
       label: '0-6 meses',
       icon: '🍼',
-      desc: 'Lactancia materna exclusiva o fórmula. No introducir sólidos.',
-      foods: ['Leche materna', 'Fórmula infantil'],
+      desc: 'Chile Crece Contigo refuerza lactancia materna exclusiva hasta los 6 meses; si no es posible, usar fórmula indicada por profesional.',
+      foods: ['Leche materna', 'Fórmula indicada', 'Sin agua, jugos ni sólidos'],
     },
     {
       stage: '6m',
       label: '6 meses',
       icon: '🥣',
-      desc: 'Inicio de papillas. Introducir un alimento a la vez, esperar 3-5 días.',
-      foods: ['Puré de zanahoria', 'Puré de papa', 'Puré de zapallo', 'Cereal de arroz'],
+      desc: 'Inicio de alimentación complementaria, manteniendo lactancia. Registrar tolerancia y avanzar texturas según indicación del control.',
+      foods: ['Verduras cocidas', 'Frutas molidas', 'Cereales', 'Carnes o legumbres bien molidas'],
     },
     {
       stage: '8m',
       label: '7-8 meses',
       icon: '🥦',
-      desc: 'Texturas más gruesas. Proteínas suaves.',
-      foods: ['Pollo desmenuzado', 'Lentejas', 'Yogur natural', 'Frutas blandas'],
+      desc: 'Progresar a texturas más gruesas y alimentos ricos en hierro, cuidando tamaño y consistencia.',
+      foods: ['Pollo o pavo molido', 'Legumbres pasadas', 'Pescado bien cocido', 'Frutas blandas'],
     },
     {
       stage: '10m',
       label: '9-12 meses',
       icon: '🍳',
-      desc: 'Trozos pequeños. Casi toda la familia.',
-      foods: ['Huevo bien cocido', 'Pescado blanco', 'Pasta pequeña', 'Pan blando'],
+      desc: 'Aumentar variedad, promover alimentación familiar adaptada y evitar riesgo de atragantamiento.',
+      foods: ['Huevo bien cocido', 'Verduras en trozos blandos', 'Pasta pequeña', 'Pan blando'],
     },
     {
       stage: '12m+',
       label: '12+ meses',
       icon: '🍽️',
-      desc: 'Dieta familiar adaptada. Evitar sal, azúcar y miel.',
-      foods: ['Comida familiar sin sal', 'Frutas enteras', 'Verduras variadas', 'Legumbres'],
+      desc: 'Dieta familiar saludable adaptada: baja en sal y azúcar, con agua como bebida principal.',
+      foods: ['Comida familiar adaptada', 'Frutas', 'Verduras', 'Legumbres'],
+    },
+  ];
+
+  readonly nutritionSources = [
+    {
+      name: 'Chile Crece Contigo - La lactancia: El mejor alimento',
+      url: 'https://www.crececontigo.gob.cl/tema/la-lactancia-el-mejor-alimento/',
+      note: 'Lactancia exclusiva hasta 6 meses y complementada con otros alimentos hasta al menos 2 años.',
+    },
+    {
+      name: 'Chile Crece Contigo - Recomendaciones de lactancia materna',
+      url: 'https://www.crececontigo.gob.cl/tema/recomendaciones-de-lactancia-materna/',
+      note: 'Material de apoyo para familias y cuidadores.',
+    },
+    {
+      name: 'Salud Responde MINSAL',
+      url: 'https://saludresponde.minsal.cl/',
+      note: 'Orientación sanitaria oficial; no reemplaza el control pediátrico.',
     },
   ];
 
@@ -88,6 +121,10 @@ export class NutritionComponent implements OnInit {
   introForm: IntroForm   = this.emptyIntroForm();
 
   ngOnInit() {
+    const currentAge = this.childAgeMonths();
+    if (currentAge !== null) {
+      this.externalAgeMonths = Math.max(0, Math.min(72, currentAge));
+    }
     this.loadAll();
   }
 
@@ -184,6 +221,55 @@ export class NutritionComponent implements OnInit {
     });
   }
 
+  // ─── External recipes ──────────────────────────────────────────────────────
+
+  searchExternalRecipes() {
+    const query = this.externalQuery.trim();
+    if (query.length < 2) {
+      this.externalError.set('Escribe al menos 2 caracteres para buscar.');
+      return;
+    }
+    if (this.externalAgeMonths < 6) {
+      this.externalRecipes.set([]);
+      this.externalSource.set(null);
+      this.externalSearched.set(true);
+      this.externalError.set('Antes de los 6 meses no se muestran recetas de sólidos.');
+      return;
+    }
+
+    this.externalLoading.set(true);
+    this.externalError.set(null);
+    this.externalSearched.set(true);
+    this.svc.searchExternalRecipes(query, this.externalAgeMonths).subscribe({
+      next: (response) => {
+        this.externalRecipes.set(response.items ?? []);
+        this.externalSource.set(response.source);
+        this.externalLoading.set(false);
+        if ((response.items ?? []).length === 0) {
+          this.externalError.set('No encontré papillas compatibles con esa edad. Prueba con zanahoria, papa, zapallo, pollo, lentejas, pescado, avena o manzana.');
+        }
+      },
+      error: (err) => {
+        this.externalLoading.set(false);
+        this.externalError.set(err?.error?.error ?? 'No se pudo buscar recetas externas.');
+      },
+    });
+  }
+
+  useExternalRecipe(recipe: ExternalRecipe) {
+    this.recipeForm = {
+      name: recipe.name,
+      stage: recipe.stage,
+      texture: recipe.texture,
+      prepTimeMin: recipe.prepTimeMin,
+      ingredients: recipe.ingredients.length > 0 ? recipe.ingredients.map(i => ({ ...i })) : [{ name: '', amount: '' }],
+      steps: recipe.steps.length > 0 ? [...recipe.steps] : [''],
+    };
+    this.showRecipeForm.set(true);
+    this.success.set('Receta externa copiada como base. Revisa y adapta antes de guardar.');
+    setTimeout(() => this.success.set(null), 5000);
+  }
+
   // ─── Intro form ─────────────────────────────────────────────────────────────
 
   toggleIntroForm() {
@@ -255,6 +341,38 @@ export class NutritionComponent implements OnInit {
       severe: 'Severa',
     };
     return map[r] ?? r;
+  }
+
+  ageLabel(months: number | null): string {
+    if (months === null) {
+      return 'Edad no disponible';
+    }
+    if (months < 12) {
+      return `${months} meses`;
+    }
+    const years = Math.floor(months / 12);
+    const rest = months % 12;
+    if (rest === 0) {
+      return years === 1 ? '1 año' : `${years} años`;
+    }
+    return years === 1 ? `1 año ${rest} meses` : `${years} años ${rest} meses`;
+  }
+
+  setExternalAge(months: number) {
+    this.externalAgeMonths = Math.max(0, Math.min(72, months));
+  }
+
+  private monthsSinceBirth(birthDate: string): number | null {
+    const birth = new Date(`${birthDate}T00:00:00`);
+    if (Number.isNaN(birth.getTime())) {
+      return null;
+    }
+    const today = new Date();
+    let months = (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth();
+    if (today.getDate() < birth.getDate()) {
+      months -= 1;
+    }
+    return Math.max(0, months);
   }
 
   private emptyRecipeForm(): RecipeForm {

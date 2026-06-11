@@ -509,6 +509,12 @@
   color: #0ea5e9;
 
   svg { width: 12px; height: 12px; }
+
+  &--done {
+    background: rgba(16,185,129,0.1);
+    border-color: rgba(16,185,129,0.25);
+    color: #059669;
+  }
 }
 
 /* ─── Card body ───────────────────────────────────────────────────────────── */
@@ -592,4 +598,164 @@
 .rx-detail {
   font-size: 0.7rem;
   color: var(--text-3);
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.health-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.health-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.875rem;
+
+  h2,
+  h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0.15rem 0 0;
+    color: var(--text-3);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+.guide-rows,
+.center-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.guide-row,
+.center-item {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  strong {
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  span {
+    color: var(--text-2);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+.guide-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+
+  &--done {
+    border-color: rgba(16,185,129,0.28);
+    background: rgba(16,185,129,0.06);
+  }
+}
+
+.guide-row-text {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.guide-complete-btn {
+  min-height: 34px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(14,165,233,0.25);
+  border-radius: 8px;
+  background: rgba(14,165,233,0.08);
+  color: #0ea5e9;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--done {
+    border-color: rgba(16,185,129,0.3);
+    background: rgba(16,185,129,0.12);
+    color: #059669;
+  }
+}
+
+.external-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.625rem;
+  margin-bottom: 0.875rem;
+}
+
+.center-list {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.center-empty {
+  margin: 0;
+  padding: 0.875rem;
+  background: var(--bg-card2);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-3);
+  font-size: 0.82rem;
+}
+
+.source-link {
+  flex-shrink: 0;
+  color: var(--accent-blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+@media (max-width: 860px) {
+  .health-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .health-head,
+  .external-search {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .guide-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
 }

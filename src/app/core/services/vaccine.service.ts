@@ -17,6 +17,17 @@ export class VaccineService {
   }
 
   bulkCreate(vaccines: Partial<Vaccine>[]) {
-    return this.http.post<{ inserted: number }>(`${this.base}/bulk`, vaccines);
+    return this.http.post<{ inserted: number; matched: number; skipped: number }>(`${this.base}/bulk`, vaccines);
+  }
+
+  seedLocal() {
+    return this.http.post<{
+      inserted: number;
+      matched: number;
+      skipped: number;
+      source: string;
+      version: string;
+      url: string;
+    }>(`${this.base}/seed-local`, {});
   }
 }

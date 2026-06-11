@@ -1,14 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { FirebaseService, UploadProgress } from './firebase.service';
-import { AuthService } from './auth.service';
+import { PresignedUpload, S3ObjectReference, S3UploadService, UploadProgress } from './s3-upload.service';
 
 export interface Photo {
   id: string;
   childId: string;
   url: string;
+  storageProvider?: 's3';
+  bucket?: string;
+  key?: string;
+  contentType?: string;
+  sizeBytes?: number;
   date: string;
   tags: string[];
   caption?: string;
@@ -17,17 +22,16 @@ export interface Photo {
 
 @Injectable({ providedIn: 'root' })
 export class PhotoService {
-  private http     = inject(HttpClient);
-  private firebase = inject(FirebaseService);
-  private auth     = inject(AuthService);
-  private base     = `${environment.apiUrl}/photos`;
+  private http = inject(HttpClient);
+  private s3   = inject(S3UploadService);
+  private base = `${environment.apiUrl}/photos`;
 
   list() {
     return this.http.get<Photo[]>(this.base);
   }
 
   /**
-   * Sube una foto a Firebase Storage y luego registra la URL en el backend.
+   * Sube una foto a S3 con URL firmada y luego registra la metadata en backend.
    * @param file     Archivo seleccionado por el usuario
    * @param date     Fecha de la foto (YYYY-MM-DD)
    * @param caption  Descripción opcional
@@ -41,34 +45,30 @@ export class PhotoService {
     tags: string[],
     onProgress: (p: UploadProgress) => void,
   ): Observable<Photo> {
-    const userId    = this.auth.user()?.id ?? 'unknown';
-    const ext       = file.name.split('.').pop() ?? 'jpg';
-    const timestamp = Date.now();
-    const path      = `baby-photos/${userId}/${timestamp}.${ext}`;
-
-    return new Observable<Photo>((observer) => {
-      this.firebase.uploadFile(path, file, (progress) => {
-        onProgress(progress);
-
-        if (progress.error) {
-          observer.error(new Error(progress.error));
-          return;
-        }
-
-        if (progress.url) {
-          // URL obtenida de Firebase — registrarla en nuestro backend
-          this.http.post<Photo>(this.base, {
-            url: progress.url,
+    return this.http.post<PresignedUpload>(`${this.base}/presign`, {
+      fileName: file.name,
+      contentType: file.type || 'image/jpeg',
+      sizeBytes: file.size,
+      date,
+    }).pipe(
+      switchMap((presigned) => this.s3.upload(presigned, file, onProgress).pipe(
+        switchMap(() => {
+          const ref: S3ObjectReference = {
+            storageProvider: 's3',
+            bucket: presigned.bucket,
+            key: presigned.key,
+            contentType: presigned.contentType,
+            sizeBytes: file.size,
+          };
+          return this.http.post<Photo>(this.base, {
+            ...ref,
             date,
             caption: caption || undefined,
             tags,
-          }).subscribe({
-            next: (photo) => { observer.next(photo); observer.complete(); },
-            error: (err)  => observer.error(err),
           });
-        }
-      });
-    });
+        }),
+      )),
+    );
   }
 
   delete(id: string) {

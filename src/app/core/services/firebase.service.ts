@@ -1,34 +1,28 @@
 import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, logEvent, Analytics } from 'firebase/analytics';
+import {
+  Auth,
+  GoogleAuthProvider,
+  User,
+  getAuth,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { environment } from '../../../environments/environment';
-
-const firebaseConfig = {
-  apiKey: 'AIzaSyCR8UtPh4STNoFW_VbDHd8XFSdU5cGeNAs',
-  authDomain: 'proyectos-hobbys-495300.firebaseapp.com',
-  projectId: 'proyectos-hobbys-495300',
-  storageBucket: 'proyectos-hobbys-495300.firebasestorage.app',
-  messagingSenderId: '1057417146171',
-  appId: '1:1057417146171:web:ecb9368d3f7f40b16ed11e',
-  measurementId: 'G-LHPSYHLPLL',
-};
-
-export interface UploadProgress {
-  progress: number;   // 0-100
-  url?: string;       // disponible cuando completa
-  error?: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
   private app: FirebaseApp;
-  private storage: FirebaseStorage;
+  private auth: Auth;
   private analytics: Analytics | null = null;
+  private googleProvider = new GoogleAuthProvider();
 
   constructor() {
-    this.app = initializeApp(firebaseConfig);
-    this.storage = getStorage(this.app);
+    this.app = initializeApp(environment.firebaseConfig);
+    this.auth = getAuth(this.app);
+    this.googleProvider.setCustomParameters({ prompt: 'select_account' });
 
     // Analytics solo en producción y solo en el browser (no SSR)
     if (environment.production && typeof window !== 'undefined') {
@@ -40,39 +34,37 @@ export class FirebaseService {
     }
   }
 
-  /**
-   * Sube un archivo a Firebase Storage.
-   * @param path  ruta en el bucket, ej: "photos/userId/nombre.jpg"
-   * @param file  File del input HTML
-   * @returns Observable-like via callback con progreso y URL final
-   */
-  uploadFile(
-    storagePath: string,
-    file: File,
-    onProgress: (p: UploadProgress) => void,
-  ): () => void {
-    const storageRef = ref(this.storage, storagePath);
-    const task = uploadBytesResumable(storageRef, file);
+  signInWithGoogle(): Promise<User> {
+    return signInWithPopup(this.auth, this.googleProvider).then((credential) => credential.user);
+  }
 
-    task.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-        );
-        onProgress({ progress });
-      },
-      (error) => {
-        onProgress({ progress: 0, error: error.message });
-      },
-      async () => {
-        const url = await getDownloadURL(task.snapshot.ref);
-        onProgress({ progress: 100, url });
-      },
-    );
+  signOut(): Promise<void> {
+    return signOut(this.auth);
+  }
 
-    // Retorna función para cancelar la subida si fuera necesario
-    return () => task.cancel();
+  async getIdToken(forceRefresh = false): Promise<string | null> {
+    const user = await this.getCurrentUser();
+    return user ? user.getIdToken(forceRefresh) : null;
+  }
+
+  private getCurrentUser(): Promise<User | null> {
+    if (this.auth.currentUser) {
+      return Promise.resolve(this.auth.currentUser);
+    }
+
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(
+        this.auth,
+        (user) => {
+          unsubscribe();
+          resolve(user);
+        },
+        () => {
+          unsubscribe();
+          resolve(null);
+        },
+      );
+    });
   }
 
   /** Registra un evento de Analytics (solo en producción) */
