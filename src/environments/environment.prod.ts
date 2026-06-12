@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://backend-app-beb.onrender.com/api', // Reemplazar con URL de producción
+  apiUrl: 'https://baby-backend-cz56.onrender.com/api', // Reemplazar con URL de producción
   firebaseConfig: {
     apiKey: 'AIzaSyCR8UtPh4STNoFW_VbDHd8XFSdU5cGeNAs',
     authDomain: 'proyectos-hobbys-495300.firebaseapp.com',
