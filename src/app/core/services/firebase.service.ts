@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAnalytics, logEvent, Analytics } from 'firebase/analytics';
 import {
   Auth,
   GoogleAuthProvider,
@@ -16,22 +15,12 @@ import { environment } from '../../../environments/environment';
 export class FirebaseService {
   private app: FirebaseApp;
   private auth: Auth;
-  private analytics: Analytics | null = null;
   private googleProvider = new GoogleAuthProvider();
 
   constructor() {
     this.app = initializeApp(environment.firebaseConfig);
     this.auth = getAuth(this.app);
     this.googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-    // Analytics solo en producción y solo en el browser (no SSR)
-    if (environment.production && typeof window !== 'undefined') {
-      try {
-        this.analytics = getAnalytics(this.app);
-      } catch {
-        // Analytics puede fallar en entornos sin cookies habilitadas
-      }
-    }
   }
 
   signInWithGoogle(): Promise<User> {
@@ -67,10 +56,5 @@ export class FirebaseService {
     });
   }
 
-  /** Registra un evento de Analytics (solo en producción) */
-  logEvent(name: string, params?: Record<string, unknown>) {
-    if (this.analytics) {
-      logEvent(this.analytics, name, params);
-    }
-  }
+  logEvent(_name: string, _params?: Record<string, unknown>) {}
 }

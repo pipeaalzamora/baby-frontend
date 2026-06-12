@@ -27,6 +27,8 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
+    if (this.loading()) return;
+
     this.loading.set(true);
     this.error.set(null);
 
