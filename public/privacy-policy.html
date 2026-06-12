@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Politica de privacidad - BabyApp</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #172033;
+      background: #f6f8fb;
+    }
+    body {
+      margin: 0;
+      line-height: 1.6;
+    }
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 64px;
+    }
+    h1, h2 {
+      line-height: 1.2;
+      color: #0f172a;
+    }
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin: 0 0 8px;
+    }
+    h2 {
+      margin-top: 34px;
+      font-size: 1.25rem;
+    }
+    p, li {
+      font-size: 1rem;
+    }
+    .meta {
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+    .panel {
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+    }
+    a {
+      color: #0f6f8f;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Politica de privacidad de BabyApp</h1>
+    <p class="meta">Ultima actualizacion: 12 de junio de 2026</p>
+
+    <section class="panel">
+      <p>
+        BabyApp ayuda a madres, padres y cuidadores a registrar informacion de crecimiento,
+        salud, alimentacion, vacunas, controles, medicamentos, hitos, fotos y diario de sus hijos.
+        Esta politica explica que datos tratamos y como puedes solicitar su eliminacion.
+      </p>
+
+      <h2>Datos que recopilamos</h2>
+      <ul>
+        <li>Datos de cuenta: nombre, correo electronico, foto de perfil y proveedor de autenticacion de Google/Firebase.</li>
+        <li>Datos del hijo: nombre, fecha de nacimiento, genero, grupo sanguineo opcional, peso, talla y foto de perfil.</li>
+        <li>Datos de salud y cuidado: vacunas, controles medicos, medicamentos, crecimiento, hitos, alimentacion, recetas, diario y notas.</li>
+        <li>Fotos cargadas por el usuario y metadatos necesarios para mostrarlas dentro de la cuenta.</li>
+        <li>Datos tecnicos necesarios para seguridad, autenticacion, funcionamiento del backend y almacenamiento.</li>
+      </ul>
+
+      <h2>Finalidad del tratamiento</h2>
+      <p>
+        Usamos estos datos para permitir el funcionamiento de la aplicacion, sincronizar la informacion
+        entre web y movil, mostrar recordatorios, organizar perfiles infantiles y mantener la seguridad de la cuenta.
+      </p>
+
+      <h2>Servicios utilizados</h2>
+      <ul>
+        <li>Firebase Authentication para inicio de sesion con Google.</li>
+        <li>MongoDB para almacenar la informacion de la cuenta y perfiles infantiles.</li>
+        <li>Amazon S3 para almacenar fotos privadas mediante URLs firmadas.</li>
+        <li>Render y AWS Amplify para publicar backend y frontend.</li>
+      </ul>
+
+      <h2>Comparticion de datos</h2>
+      <p>
+        No vendemos datos personales. Los datos se procesan en proveedores tecnicos necesarios para operar
+        BabyApp. La informacion de salud y fotos se usa para la cuenta del usuario y no se publica.
+      </p>
+
+      <h2>Seguridad</h2>
+      <p>
+        La app usa autenticacion Firebase, conexion HTTPS en produccion y fotos privadas en S3.
+        El acceso a fotos se realiza mediante URLs firmadas de corta duracion.
+      </p>
+
+      <h2>Eliminacion de cuenta y datos</h2>
+      <p>
+        Puedes eliminar tu cuenta desde la aplicacion movil en el menu lateral, opcion
+        <strong>Eliminar cuenta</strong>. Esa accion elimina perfiles infantiles, vacunas, controles,
+        medicamentos, recetas, fotos, diario, notificaciones y datos de cuenta asociados.
+      </p>
+      <p>
+        Si ya no tienes acceso a la app, solicita la eliminacion escribiendo a
+        <a href="mailto:soporte@babyapp.cl?subject=Eliminar%20cuenta%20BabyApp">soporte@babyapp.cl</a>
+        desde el correo asociado a tu cuenta. Responderemos la solicitud en un plazo razonable y podremos
+        pedir informacion adicional para verificar la titularidad de la cuenta.
+      </p>
+
+      <h2>Contacto</h2>
+      <p>
+        Para consultas sobre privacidad o eliminacion de datos, escribe a
+        <a href="mailto:soporte@babyapp.cl">soporte@babyapp.cl</a>.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
