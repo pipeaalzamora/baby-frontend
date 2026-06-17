@@ -1,0 +1,229 @@
+<div class="explore-page" [attr.data-tab]="activeTab()">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <span class="explore-emoji">🧭</span>
+      </div>
+      <div>
+        <h1 class="page-title">Descubre</h1>
+        <p class="page-subtitle">Productos, salud y novedades para tu bebé</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'products'"
+            (click)="setTab('products')" type="button">
+      🛒 <span class="tab-label">Productos</span>
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'health'"
+            (click)="setTab('health')" type="button">
+      💊 <span class="tab-label">Salud</span>
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'recalls'"
+            (click)="setTab('recalls')" type="button">
+      ⚠️ <span class="tab-label">Alertas</span>
+    </button>
+    <button class="tab-btn" [class.tab-btn--active]="activeTab() === 'news'"
+            (click)="setTab('news')" type="button">
+      📰 <span class="tab-label">Noticias</span>
+    </button>
+  </div>
+
+  <!-- Search bar -->
+  <form class="search-bar" (ngSubmit)="search()">
+    <input type="text" class="search-input" [(ngModel)]="searchQuery" name="searchQuery"
+           [placeholder]="searchPlaceholder()" />
+    <button class="search-btn" type="submit" [disabled]="loading()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="M21 21l-4.3-4.3"/>
+      </svg>
+      <span>Buscar</span>
+    </button>
+  </form>
+
+  <!-- Product source pills -->
+  @if (activeTab() === 'products') {
+    <div class="source-pills">
+      <button class="source-pill" [class.source-pill--active]="productSource() === 'mercadolibre'"
+              (click)="setProductSource('mercadolibre')" type="button">Mercado Libre</button>
+      <button class="source-pill" [class.source-pill--active]="productSource() === 'walmart'"
+              (click)="setProductSource('walmart')" type="button">Walmart</button>
+      <button class="source-pill" [class.source-pill--active]="productSource() === 'ebay'"
+              (click)="setProductSource('ebay')" type="button">eBay</button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="dots-loader"><span></span><span></span><span></span></div>
+      <p>Buscando...</p>
+    </div>
+  } @else if (error()) {
+
+    <!-- Error / not configured -->
+    @if (isNotConfigured()) {
+      <div class="notice-card">
+        <div class="notice-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="11" width="16" height="9" rx="2"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            <circle cx="12" cy="15.5" r="1.2"/>
+          </svg>
+        </div>
+        <p class="notice-title">Fuente no configurada</p>
+        <p class="notice-sub">Esta fuente requiere configuración de API key en el servidor. Vuelve más tarde o prueba con otra pestaña.</p>
+      </div>
+    } @else {
+      <div class="toast toast--error" role="alert">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        {{ error() }}
+      </div>
+    }
+
+  } @else {
+
+    <!-- ─── Productos ─────────────────────────────────────────────── -->
+    @if (activeTab() === 'products') {
+      @if (products().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🛒</div>
+          <p class="empty-title">Sin productos</p>
+          <p class="empty-sub">No encontramos productos para tu búsqueda. Prueba con otra palabra u otra fuente.</p>
+        </div>
+      } @else {
+        <div class="product-grid">
+          @for (p of products(); track p.id; let i = $index) {
+            <article class="product-card" [style.animation-delay]="(i * 40) + 'ms'">
+              <div class="product-thumb">
+                @if (p.thumbnail) {
+                  <img [src]="p.thumbnail" [alt]="p.title" loading="lazy" referrerpolicy="no-referrer"/>
+                } @else {
+                  <div class="thumb-fallback">🍼</div>
+                }
+                @if (p.freeShipping) {
+                  <span class="badge-shipping">Envío gratis</span>
+                }
+              </div>
+              <div class="product-body">
+                <h3 class="product-title">{{ p.title }}</h3>
+                <div class="product-price">{{ formatPrice(p.price, p.currency) }}</div>
+                <div class="product-meta">
+                  @if (p.condition) {
+                    <span class="badge-condition"
+                          [class.badge-condition--used]="p.condition !== 'new' && p.condition !== 'nuevo'">
+                      {{ p.condition === 'new' || p.condition === 'nuevo' ? 'Nuevo' : 'Usado' }}
+                    </span>
+                  }
+                  @if (p.seller) {
+                    <span class="product-seller">{{ p.seller }}</span>
+                  }
+                </div>
+                <a class="product-link" [href]="p.permalink" target="_blank" rel="noopener">Ver</a>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+
+    <!-- ─── Salud ─────────────────────────────────────────────────── -->
+    @if (activeTab() === 'health') {
+      @if (healthTopics().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">💊</div>
+          <p class="empty-title">Sin temas de salud</p>
+          <p class="empty-sub">Busca un tema de salud para ver información confiable en español.</p>
+        </div>
+      } @else {
+        <div class="card-list">
+          @for (t of healthTopics(); track t.url; let i = $index) {
+            <article class="info-card" [style.animation-delay]="(i * 50) + 'ms'">
+              <h3 class="info-title">{{ t.title }}</h3>
+              <p class="info-summary">{{ t.summary }}</p>
+              <a class="info-link" [href]="t.url" target="_blank" rel="noopener">Leer más</a>
+            </article>
+          }
+        </div>
+      }
+    }
+
+    <!-- ─── Alertas (recalls) ─────────────────────────────────────── -->
+    @if (activeTab() === 'recalls') {
+      @if (recalls().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <p class="empty-title">Sin alertas</p>
+          <p class="empty-sub">No hay alertas de productos retirados para tu búsqueda.</p>
+        </div>
+      } @else {
+        <div class="card-list">
+          @for (r of recalls(); track r.id; let i = $index) {
+            <article class="info-card info-card--recall" [style.animation-delay]="(i * 50) + 'ms'">
+              <div class="recall-head">
+                <span class="badge-date">{{ r.date }}</span>
+              </div>
+              <h3 class="info-title">{{ r.title }}</h3>
+              <p class="info-summary">{{ r.description }}</p>
+              @if (r.hazards) {
+                <p class="recall-hazard">⚠️ {{ r.hazards }}</p>
+              }
+              <a class="info-link" [href]="r.url" target="_blank" rel="noopener">Ver detalle</a>
+            </article>
+          }
+        </div>
+      }
+    }
+
+    <!-- ─── Noticias ──────────────────────────────────────────────── -->
+    @if (activeTab() === 'news') {
+      @if (news().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">📰</div>
+          <p class="empty-title">Sin noticias</p>
+          <p class="empty-sub">No encontramos noticias para tu búsqueda.</p>
+        </div>
+      } @else {
+        <div class="card-list">
+          @for (n of news(); track n.url; let i = $index) {
+            <article class="news-card" [style.animation-delay]="(i * 50) + 'ms'">
+              @if (n.image) {
+                <div class="news-thumb">
+                  <img [src]="n.image" [alt]="n.title" loading="lazy" referrerpolicy="no-referrer"/>
+                </div>
+              }
+              <div class="news-body">
+                <h3 class="info-title">{{ n.title }}</h3>
+                <p class="info-summary">{{ n.description }}</p>
+                <div class="news-meta">
+                  <span class="news-source">{{ n.source }}</span>
+                  <span class="news-dot">·</span>
+                  <span class="news-date">{{ n.publishedAt | slice:0:10 }}</span>
+                </div>
+                <a class="info-link" [href]="n.url" target="_blank" rel="noopener">Leer noticia</a>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+
+    <!-- Atribución de fuente -->
+    @if (source()) {
+      <footer class="source-attribution">
+        <span class="source-name">Fuente: {{ source()!.name }}</span>
+        @if (source()!.disclaimer) {
+          <span class="source-disclaimer">{{ source()!.disclaimer }}</span>
+        }
+      </footer>
+    }
+  }
+
+</div>

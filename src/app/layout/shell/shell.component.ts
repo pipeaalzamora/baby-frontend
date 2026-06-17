@@ -64,5 +64,6 @@ export class ShellComponent implements OnInit {
     { path: '/milestones',  label: 'Hitos',              icon: 'star',        color: '#f59e0b' },
     { path: '/photos',      label: 'Fotos',              icon: 'camera',      color: '#6366f1' },
     { path: '/diary',       label: 'Diario',             icon: 'diary',       color: '#8b5cf6' },
+    { path: '/explore',     label: 'Descubre',           icon: 'compass',     color: '#0ea5e9' },
   ];
 }

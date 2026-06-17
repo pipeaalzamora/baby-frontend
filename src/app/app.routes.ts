@@ -71,6 +71,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/diary/diary.component').then(m => m.DiaryComponent),
       },
+      {
+        path: 'explore',
+        loadComponent: () =>
+          import('./features/explore/explore.component').then(m => m.ExploreComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
