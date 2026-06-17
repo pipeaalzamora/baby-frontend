@@ -72,6 +72,16 @@ export class IntegrationsService {
     return this.http.get<ListResponse<Product>>(`${this.base}/products`, { params });
   }
 
+  /** Estado de conexión OAuth con Mercado Libre */
+  mlStatus() {
+    return this.http.get<{ connected: boolean }>(`${this.base}/ml/status`);
+  }
+
+  /** Obtiene la URL de autorización de Mercado Libre para conectar la cuenta */
+  mlConnectUrl() {
+    return this.http.get<{ authUrl: string }>(`${this.base}/ml/connect`);
+  }
+
   /** Temas de salud en español (MedlinePlus) */
   searchHealthTopics(query: string, limit = 10) {
     const params = new HttpParams().set('q', query).set('limit', limit);

@@ -92,7 +92,25 @@
 
     <!-- ─── Productos ─────────────────────────────────────────────── -->
     @if (activeTab() === 'products') {
-      @if (products().length === 0) {
+      @if (needsMLConnect()) {
+        <div class="notice-card">
+          <div class="notice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M8 12h8M12 8v8"/>
+            </svg>
+          </div>
+          <p class="notice-title">Conecta tu cuenta de Mercado Libre</p>
+          <p class="notice-sub">Para buscar productos reales en Chile con precios actualizados, autoriza el acceso a Mercado Libre (solo una vez).</p>
+          <button class="search-btn" type="button" (click)="connectMercadoLibre()" [disabled]="mlConnecting()" style="margin-top:0.5rem;">
+            @if (mlConnecting()) {
+              Conectando...
+            } @else {
+              Conectar Mercado Libre
+            }
+          </button>
+        </div>
+      } @else if (products().length === 0) {
         <div class="empty-state">
           <div class="empty-icon">🛒</div>
           <p class="empty-title">Sin productos</p>

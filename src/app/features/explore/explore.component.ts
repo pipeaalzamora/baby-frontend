@@ -36,6 +36,10 @@ export class ExploreComponent implements OnInit {
   error = signal<string | null>(null);
   source = signal<SourceInfo | null>(null);
 
+  // Mercado Libre OAuth
+  needsMLConnect = signal(false);
+  mlConnecting = signal(false);
+
   // Marca qué tabs ya fueron cargados al menos una vez
   private loaded = signal<Record<ExploreTab, boolean>>({
     products: false,
@@ -45,7 +49,12 @@ export class ExploreComponent implements OnInit {
   });
 
   ngOnInit() {
-    // Carga por defecto: noticias y alertas
+    // Si volvemos del callback de ML con ?ml=connected, recargar productos
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('ml') === 'connected') {
+      this.activeTab.set('products');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
     this.search();
     this.svc.searchRecalls('', 20).subscribe({
       next: (res) => {
@@ -53,6 +62,20 @@ export class ExploreComponent implements OnInit {
         this.markLoaded('recalls');
       },
       error: () => undefined,
+    });
+  }
+
+  /** Inicia el flujo OAuth de Mercado Libre redirigiendo al usuario */
+  connectMercadoLibre() {
+    this.mlConnecting.set(true);
+    this.svc.mlConnectUrl().subscribe({
+      next: (res) => {
+        window.location.href = res.authUrl;
+      },
+      error: () => {
+        this.mlConnecting.set(false);
+        this.error.set('No se pudo iniciar la conexión con Mercado Libre.');
+      },
     });
   }
 
@@ -85,6 +108,7 @@ export class ExploreComponent implements OnInit {
     switch (tab) {
       case 'products': {
         const query = q || 'bebé';
+        this.needsMLConnect.set(false);
         this.svc.searchProducts(query, this.productSource(), 20).subscribe({
           next: (res) => {
             this.products.set(res.items);
@@ -143,7 +167,13 @@ export class ExploreComponent implements OnInit {
 
   private handleError(err: unknown) {
     this.loading.set(false);
-    const e = err as { status?: number; error?: { error?: string } };
+    const e = err as { status?: number; error?: { error?: string; needsMLConnect?: boolean } };
+    // Mercado Libre requiere conexión OAuth del usuario
+    if (e?.status === 409 && e?.error?.needsMLConnect) {
+      this.needsMLConnect.set(true);
+      this.error.set(null);
+      return;
+    }
     if (e?.status === 503) {
       this.error.set('Esta fuente requiere configuración de API key');
     } else {
