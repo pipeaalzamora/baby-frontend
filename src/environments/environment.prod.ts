@@ -10,4 +10,6 @@ export const environment = {
     appId: '1:1057417146171:web:ecb9368d3f7f40b16ed11e',
     measurementId: 'G-LHPSYHLPLL',
   },
+  // TODO: pegar la clave VAPID de Firebase (Cloud Messaging > Web Push certificates)
+  vapidKey: '',
 };

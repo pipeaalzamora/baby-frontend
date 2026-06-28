@@ -27,6 +27,11 @@ export class FirebaseService {
     return signInWithPopup(this.auth, this.googleProvider).then((credential) => credential.user);
   }
 
+  /** Expone la FirebaseApp inicializada para reutilizarla (p. ej. Messaging). */
+  getApp(): FirebaseApp {
+    return this.app;
+  }
+
   signOut(): Promise<void> {
     return signOut(this.auth);
   }

@@ -29,6 +29,28 @@
   gap: 0.875rem;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.premium-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  box-shadow: 0 3px 10px rgba(245,158,11,0.4);
+  svg { width: 13px; height: 13px; }
+}
+
 .header-icon {
   width: 48px;
   height: 48px;

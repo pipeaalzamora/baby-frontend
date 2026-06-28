@@ -7,6 +7,7 @@ import {
   MedicineRecord,
   Pharmacy,
   SourceInfo,
+  friendlyExternalError,
 } from '../../core/services/chile-health.service';
 
 interface MedicationForm {
@@ -194,9 +195,9 @@ export class MedicationsComponent implements OnInit {
         this.pharmacySource.set(res.source);
         this.loadingPharmacies.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.loadingPharmacies.set(false);
-        this.externalError.set('No pudimos consultar farmacias MINSAL.');
+        this.externalError.set(friendlyExternalError(err, 'No pudimos consultar farmacias MINSAL.'));
       },
     });
   }
@@ -224,9 +225,9 @@ export class MedicationsComponent implements OnInit {
         this.medicineSource.set(res.source);
         this.searchingMedicines.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.searchingMedicines.set(false);
-        this.externalError.set('No pudimos consultar el registro ISP.');
+        this.externalError.set(friendlyExternalError(err, 'No pudimos consultar el registro ISP.'));
       },
     });
   }

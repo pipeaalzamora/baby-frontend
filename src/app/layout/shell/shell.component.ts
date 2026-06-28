@@ -3,6 +3,9 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ChildService } from '../../core/services/child.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { ToastService } from '../../core/services/toast.service';
+import { PushService } from '../../core/services/push.service';
+import { BillingService } from '../../core/services/billing.service';
 import { Child } from '../../core/models/models';
 
 @Component({
@@ -16,15 +19,25 @@ export class ShellComponent implements OnInit {
   auth = inject(AuthService);
   childSvc = inject(ChildService);
   theme = inject(ThemeService);
+  toast = inject(ToastService);
+  billing = inject(BillingService);
+  private push = inject(PushService);
   sidebarOpen = signal(false);
 
   ngOnInit() {
     this.childSvc.list().subscribe({ error: () => undefined });
+    // Estado premium para insignias y gating en toda la app.
+    this.billing.status().subscribe({ error: () => undefined });
+    // Usuario autenticado (el shell solo carga tras authGuard): registramos push.
+    void this.push.register();
   }
 
   toggleSidebar() { this.sidebarOpen.update(v => !v); }
   closeSidebar()  { this.sidebarOpen.set(false); }
-  logout()        { this.auth.logout(); }
+  logout()        {
+    void this.push.unregister();
+    this.auth.logout();
+  }
 
   selectActiveChild(event: Event) {
     const id = (event.target as HTMLSelectElement).value;
@@ -65,5 +78,8 @@ export class ShellComponent implements OnInit {
     { path: '/photos',      label: 'Fotos',              icon: 'camera',      color: '#6366f1' },
     { path: '/diary',       label: 'Diario',             icon: 'diary',       color: '#8b5cf6' },
     { path: '/explore',     label: 'Descubre',           icon: 'compass',     color: '#0ea5e9' },
+    { path: '/caregivers',  label: 'Cuidadores',         icon: 'users',       color: '#14b8a6' },
+    { path: '/assistant',   label: 'Asistente IA',       icon: 'chat',        color: '#8b5cf6' },
+    { path: '/premium',     label: 'Premium',            icon: 'crown',       color: '#f59e0b' },
   ];
 }

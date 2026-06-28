@@ -6,6 +6,7 @@ import { Child } from '../../core/models/models';
 import { ChildProfileInput, ChildService } from '../../core/services/child.service';
 import { S3ObjectReference, UploadProgress } from '../../core/services/s3-upload.service';
 import { VaccineService } from '../../core/services/vaccine.service';
+import { BillingService } from '../../core/services/billing.service';
 
 type EditorMode = 'edit' | 'create';
 
@@ -20,9 +21,12 @@ export class ProfileComponent implements OnInit {
   private childSvc = inject(ChildService);
   private vaccineSvc = inject(VaccineService);
   private router = inject(Router);
+  private billing = inject(BillingService);
 
   children = this.childSvc.children;
   activeChild = this.childSvc.activeChild;
+  /** Estado premium para mostrar la insignia en el encabezado. */
+  premium = this.billing.premium;
 
   loading = signal(true);
   saving = signal(false);

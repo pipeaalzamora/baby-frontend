@@ -13,12 +13,22 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn--primary" (click)="startCreate()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-      Agregar hijo
-    </button>
+    <div class="header-right">
+      @if (premium()) {
+        <span class="premium-badge" title="Plan premium activo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7l4 5 5-7 5 7 4-5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+          </svg>
+          Premium
+        </span>
+      }
+      <button type="button" class="btn btn--primary" (click)="startCreate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Agregar hijo
+      </button>
+    </div>
   </header>
 
   @if (error()) {

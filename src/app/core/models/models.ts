@@ -53,6 +53,23 @@ export interface Vaccine {
 
 // ─── Measurement ──────────────────────────────────────────────────────────────
 
+/** Indicador OMS para una dimensión (peso, talla o perímetro cefálico). */
+export interface GrowthIndicator {
+  zScore: number;
+  percentile: number;
+  median: number;
+  interpretation: string;
+}
+
+/** Datos de crecimiento OMS calculados por el backend para una medición. */
+export interface Growth {
+  ageMonths: number;
+  sex: 'M' | 'F';
+  weight?: GrowthIndicator;
+  height?: GrowthIndicator;
+  head?: GrowthIndicator;
+}
+
 export interface Measurement {
   id: string;
   childId: string;
@@ -62,6 +79,7 @@ export interface Measurement {
   headCircumferenceCm: number;
   percentileWeight?: number;
   percentileHeight?: number;
+  growth?: Growth;
   createdAt: string;
 }
 
@@ -137,4 +155,53 @@ export interface AppNotification {
   read: boolean;
   relatedId?: string;
   createdAt: string;
+}
+
+// ─── Caregivers / Sharing ───────────────────────────────────────────────────
+
+export type CaregiverRole = 'parent' | 'caregiver' | 'doctor' | 'viewer';
+
+export interface Caregiver {
+  id: string;
+  childId: string;
+  email: string;
+  name?: string;
+  role: CaregiverRole;
+  invitedAt?: string;
+  acceptedAt?: string;
+  avatarUrl?: string;
+}
+
+export interface CaregiverInvite {
+  caregiver: Caregiver;
+  inviteLink: string;
+}
+
+export interface AcceptInviteResult {
+  ok: boolean;
+  childId: string;
+  role: CaregiverRole;
+}
+
+/** Perfil de otro usuario compartido conmigo. Incluye el rol con el que se compartió. */
+export interface SharedChild extends Child {
+  sharedRole: CaregiverRole;
+}
+
+// ─── Growth curves (OMS) ──────────────────────────────────────────────────────
+
+export interface GrowthCurvePoint {
+  month: number;
+  p3: number;
+  p15: number;
+  p50: number;
+  p85: number;
+  p97: number;
+}
+
+export interface GrowthCurves {
+  sex: 'M' | 'F';
+  weight: GrowthCurvePoint[];
+  height: GrowthCurvePoint[];
+  head: GrowthCurvePoint[];
 }

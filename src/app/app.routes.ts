@@ -9,11 +9,33 @@ export const routes: Routes = [
       import('./features/login/login.component').then(m => m.LoginComponent),
   },
   {
+    // Política de privacidad: pública, sin authGuard (requisito de las tiendas)
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/privacy/privacy.component').then(m => m.PrivacyComponent),
+  },
+  {
     // Setup: requiere auth pero NO childGuard (el bebé aún no existe)
     path: 'setup',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/setup/setup.component').then(m => m.SetupComponent),
+  },
+  {
+    // Aceptar invitación: requiere auth pero NO childGuard
+    // (quien acepta puede no tener un perfil propio todavía)
+    path: 'invite/:token',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/invite/invite.component').then(m => m.InviteComponent),
+  },
+  {
+    // Resultado del pago Transbank: el backend redirige aquí tras Webpay.
+    // Requiere auth pero NO childGuard (el usuario vuelve desde un dominio externo).
+    path: 'billing/result',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/billing/billing-result.component').then(m => m.BillingResultComponent),
   },
   {
     path: '',
@@ -75,6 +97,21 @@ export const routes: Routes = [
         path: 'explore',
         loadComponent: () =>
           import('./features/explore/explore.component').then(m => m.ExploreComponent),
+      },
+      {
+        path: 'caregivers',
+        loadComponent: () =>
+          import('./features/caregivers/caregivers.component').then(m => m.CaregiversComponent),
+      },
+      {
+        path: 'assistant',
+        loadComponent: () =>
+          import('./features/assistant/assistant.component').then(m => m.AssistantComponent),
+      },
+      {
+        path: 'premium',
+        loadComponent: () =>
+          import('./features/premium/premium.component').then(m => m.PremiumComponent),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

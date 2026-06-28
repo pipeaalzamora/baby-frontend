@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { VaccineService } from '../../core/services/vaccine.service';
 import { Vaccine } from '../../core/models/models';
-import { ChileHealthService, HealthCenter, SourceInfo } from '../../core/services/chile-health.service';
+import { ChileHealthService, HealthCenter, SourceInfo, friendlyExternalError } from '../../core/services/chile-health.service';
 
 interface AdministerForm {
   administeredDate: string;
@@ -130,9 +130,9 @@ export class VaccinesComponent implements OnInit {
         this.healthSource.set(res.source);
         this.loadingCenters.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.loadingCenters.set(false);
-        this.centerError.set('No pudimos consultar establecimientos DEIS/MINSAL.');
+        this.centerError.set(friendlyExternalError(err, 'No pudimos consultar establecimientos DEIS/MINSAL.'));
       },
     });
   }

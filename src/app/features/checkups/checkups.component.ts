@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { CheckupService } from '../../core/services/checkup.service';
 import { Checkup, Prescription } from '../../core/models/models';
-import { ChileHealthService, HealthCenter, SourceInfo } from '../../core/services/chile-health.service';
+import { ChileHealthService, HealthCenter, SourceInfo, friendlyExternalError } from '../../core/services/chile-health.service';
 
 interface CheckupForm {
   date: string;
@@ -224,9 +224,9 @@ export class CheckupsComponent implements OnInit {
         this.healthSource.set(res.source);
         this.loadingCenters.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.loadingCenters.set(false);
-        this.externalError.set('No pudimos consultar establecimientos DEIS.');
+        this.externalError.set(friendlyExternalError(err, 'No pudimos consultar establecimientos DEIS.'));
       },
     });
   }

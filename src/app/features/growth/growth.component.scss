@@ -74,6 +74,33 @@
   &:active { transform: translateY(0); }
 }
 
+/* ─── Header actions ──────────────────────────────────────────────────────── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  background: var(--bg-card);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
+  svg { width: 16px; height: 16px; }
+
+  &:not(:disabled):hover { transform: translateY(-2px); border-color: #0ea5e9; color: #0ea5e9; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
 /* ─── Toast ───────────────────────────────────────────────────────────────── */
 .toast {
   display: flex;
@@ -194,6 +221,11 @@
   border-radius: 50%;
   animation: spin 0.65s linear infinite;
   display: inline-block;
+
+  &--dark {
+    border-color: rgba(14,165,233,0.3);
+    border-top-color: #0ea5e9;
+  }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -434,4 +466,88 @@
   font-weight: 700;
   &--blue { color: #0ea5e9; }
   &--sky  { color: #7dd3fc; }
+}
+
+/* ─── Percentiles OMS ─────────────────────────────────────────────────────── */
+.percentile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s ease 0.1s both;
+}
+
+.percentile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.percentile-item {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+  }
+
+  &--blue::before { background: linear-gradient(180deg, #0ea5e9, #38bdf8); }
+  &--sky::before  { background: linear-gradient(180deg, #38bdf8, #7dd3fc); }
+  &--teal::before { background: linear-gradient(180deg, #14b8a6, #2dd4bf); }
+}
+
+.pct-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.pct-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.pct-interp {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  line-height: 1.3;
+}
+
+.pct-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pct-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: default;
+
+  &--blue { background: rgba(14,165,233,0.12);  color: #0ea5e9; border: 1px solid rgba(14,165,233,0.25); }
+  &--sky  { background: rgba(125,211,252,0.14); color: #38bdf8; border: 1px solid rgba(125,211,252,0.3); }
+  &--teal { background: rgba(20,184,166,0.12);  color: #14b8a6; border: 1px solid rgba(20,184,166,0.25); }
+}
+
+.pct-empty {
+  color: var(--text-3);
 }

@@ -57,6 +57,19 @@ export interface MedicineRecord {
   saleCondition: string;
 }
 
+/**
+ * Traduce un error HTTP de una fuente externa a un mensaje amistoso.
+ * - 503 → la fuente no tiene API key / no está configurada en el backend.
+ * - 409 → la cuenta del usuario no está conectada (OAuth pendiente).
+ * Cualquier otro error usa el fallback indicado por el componente.
+ */
+export function friendlyExternalError(err: unknown, fallback: string): string {
+  const e = err as { status?: number; error?: { error?: string } };
+  if (e?.status === 503) return 'Fuente no configurada';
+  if (e?.status === 409) return 'Conecta tu cuenta';
+  return e?.error?.error ?? fallback;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChileHealthService {
   private http = inject(HttpClient);

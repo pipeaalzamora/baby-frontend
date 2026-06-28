@@ -1,0 +1,179 @@
+<div class="caregivers-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Cuidadores</h1>
+        <p class="page-subtitle">Comparte el perfil con familiares y profesionales</p>
+      </div>
+    </div>
+    <button class="btn-add" (click)="toggleForm()" type="button">
+      @if (showForm()) {
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+        Cancelar
+      } @else {
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        Invitar cuidador
+      }
+    </button>
+  </div>
+
+  <!-- Invite link generado -->
+  @if (lastInviteLink(); as link) {
+    <div class="invite-link-card">
+      <div class="invite-link-head">
+        <strong>Enlace de invitación</strong>
+        <button class="link-close" (click)="dismissLink()" type="button" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="invite-link-hint">Comparte este enlace con la persona invitada para que acepte el acceso.</p>
+      <div class="invite-link-row">
+        <input class="invite-link-input" type="text" [value]="link" readonly />
+        <button class="btn btn--confirm" (click)="copyLink()" type="button">Copiar</button>
+      </div>
+    </div>
+  }
+
+  <!-- Form invitar -->
+  @if (showForm()) {
+    <div class="form-card">
+      <h2 class="form-title">Invitar cuidador</h2>
+
+      @if (error()) {
+        <div class="toast toast--error">{{ error() }}</div>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cgEmail" class="form-label">Email *</label>
+          <input id="cgEmail" type="email" class="form-input" [(ngModel)]="form.email"
+            placeholder="persona@email.com" required/>
+        </div>
+        <div class="form-group">
+          <label for="cgName" class="form-label">Nombre (opcional)</label>
+          <input id="cgName" type="text" class="form-input" [(ngModel)]="form.name"
+            placeholder="Ej: Abuela María"/>
+        </div>
+        <div class="form-group">
+          <label for="cgRole" class="form-label">Rol</label>
+          <select id="cgRole" class="form-input" [(ngModel)]="form.role">
+            @for (r of roles; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn--ghost" (click)="toggleForm()" type="button">Cancelar</button>
+        <button class="btn btn--confirm" (click)="submitInvite()" type="button" [disabled]="inviting()">
+          @if (inviting()) {
+            <span class="spinner-sm"></span> Enviando...
+          } @else {
+            Crear invitación
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Lista de cuidadores -->
+  <div class="section-card">
+    <div class="section-head">
+      <h3 class="section-title"><span class="title-dot"></span> Cuidadores de este perfil</h3>
+      <span class="record-count">{{ caregivers().length }}</span>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="dots-loader"><span></span><span></span><span></span></div>
+        <p>Cargando cuidadores...</p>
+      </div>
+    } @else if (caregivers().length === 0) {
+      <p class="empty-line">Aún no has invitado a nadie. Usa "Invitar cuidador" para empezar.</p>
+    } @else {
+      <ul class="cg-list">
+        @for (c of caregivers(); track c.id) {
+          <li class="cg-item">
+            <div class="cg-avatar">
+              @if (c.avatarUrl) {
+                <img [src]="c.avatarUrl" [alt]="c.name || c.email" referrerpolicy="no-referrer"/>
+              } @else {
+                <span>{{ (c.name || c.email).charAt(0).toUpperCase() }}</span>
+              }
+            </div>
+            <div class="cg-info">
+              <strong>{{ c.name || c.email }}</strong>
+              <small>{{ c.email }}</small>
+              <div class="cg-meta">
+                <span class="role-badge" [class.role-badge--ro]="isReadOnly(c.role)">{{ roleLabel(c.role) }}</span>
+                @if (c.acceptedAt) {
+                  <span class="status-badge status-badge--ok">Aceptada</span>
+                } @else {
+                  <span class="status-badge status-badge--pending">Pendiente</span>
+                }
+              </div>
+            </div>
+            <button class="btn-delete" (click)="remove(c)" type="button" aria-label="Quitar acceso">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 4h12M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9"/>
+              </svg>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Compartidos conmigo -->
+  <div class="section-card">
+    <div class="section-head">
+      <h3 class="section-title"><span class="title-dot title-dot--teal"></span> Compartidos conmigo</h3>
+      <span class="record-count">{{ shared().length }}</span>
+    </div>
+
+    @if (shared().length === 0) {
+      <p class="empty-line">Nadie ha compartido un perfil contigo todavía.</p>
+    } @else {
+      <ul class="cg-list">
+        @for (child of shared(); track child.id) {
+          <li class="cg-item">
+            <div class="cg-avatar">
+              @if (child.photoUrl) {
+                <img [src]="child.photoUrl" [alt]="child.name" referrerpolicy="no-referrer"/>
+              } @else {
+                <span>{{ child.name.charAt(0).toUpperCase() }}</span>
+              }
+            </div>
+            <div class="cg-info">
+              <strong>{{ child.name }}</strong>
+              <div class="cg-meta">
+                <span class="role-badge" [class.role-badge--ro]="isReadOnly(child.sharedRole)">{{ roleLabel(child.sharedRole) }}</span>
+                @if (isReadOnly(child.sharedRole)) {
+                  <span class="status-badge status-badge--ro">Solo lectura</span>
+                }
+              </div>
+            </div>
+            <button class="btn btn--confirm btn--sm" (click)="selectShared(child)" type="button">
+              Seleccionar
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

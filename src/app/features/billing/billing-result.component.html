@@ -1,0 +1,47 @@
+<div class="result-page">
+  <div class="result-card" [class.result-card--success]="status() === 'success'"
+       [class.result-card--failed]="status() === 'failed'"
+       [class.result-card--cancelled]="status() === 'cancelled'">
+
+    @switch (status()) {
+      @case ('success') {
+        <div class="result-orb result-orb--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        </div>
+        <h1 class="result-title">¡Pago exitoso!</h1>
+        <p class="result-text">Tu plan premium ya está activo. Disfruta del asistente IA ilimitado, la exportación en PDF y las curvas de crecimiento.</p>
+      }
+      @case ('cancelled') {
+        <div class="result-orb result-orb--cancelled">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </div>
+        <h1 class="result-title">Pago cancelado</h1>
+        <p class="result-text">Cancelaste el proceso de pago. Puedes intentarlo nuevamente cuando quieras.</p>
+      }
+      @default {
+        <div class="result-orb result-orb--failed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="13"/>
+            <line x1="12" y1="16" x2="12" y2="16"/>
+          </svg>
+        </div>
+        <h1 class="result-title">No se pudo completar el pago</h1>
+        <p class="result-text">Hubo un problema al procesar tu pago. No se realizó ningún cobro. Intenta nuevamente.</p>
+      }
+    }
+
+    <div class="result-actions">
+      @if (status() === 'success') {
+        <a routerLink="/dashboard" class="btn-result btn-result--primary">Ir al inicio</a>
+      } @else {
+        <a routerLink="/premium" class="btn-result btn-result--primary">Reintentar</a>
+        <a routerLink="/dashboard" class="btn-result btn-result--ghost">Volver al inicio</a>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,179 @@
+<div class="privacy-page">
+  <div class="privacy-card">
+    <header class="privacy-header">
+      <button class="back-btn" type="button" (click)="goBack()" aria-label="Volver">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        <span>Volver</span>
+      </button>
+      @if (!auth.isLoggedIn()) {
+        <a routerLink="/login" class="login-link">Iniciar sesión</a>
+      }
+    </header>
+
+    <article class="privacy-content">
+      <h1>Política de Privacidad — BabyApp</h1>
+      <p><strong>Última actualización:</strong> [completar fecha]</p>
+
+      <blockquote>
+        <strong>⚠️ Aviso legal:</strong> Esta plantilla es un punto de partida y
+        <strong>debe ser revisada por un(a) abogado(a)</strong> antes de publicarse.
+        Completa los campos entre corchetes <code>[...]</code> con tus datos reales
+        (responsable, contacto, jurisdicción).
+      </blockquote>
+
+      <p>
+        BabyApp ("la App", "nosotros") es una aplicación de seguimiento de salud y
+        desarrollo infantil. Esta Política explica qué datos personales tratamos, con
+        qué fines y qué derechos tienes. Tratamos los datos conforme a la
+        <strong>Ley N° 19.628 sobre Protección de la Vida Privada (Chile)</strong> y,
+        cuando corresponda, al
+        <strong>Reglamento General de Protección de Datos (GDPR)</strong> para personas
+        en la UE.
+      </p>
+
+      <h2>1. Responsable del tratamiento</h2>
+      <ul>
+        <li><strong>Responsable:</strong> [Nombre o razón social]</li>
+        <li><strong>Correo de contacto / privacidad:</strong> [correo]</li>
+        <li><strong>Domicilio:</strong> [dirección]</li>
+      </ul>
+
+      <h2>2. Qué datos recopilamos</h2>
+      <p><strong>Datos de cuenta (del adulto):</strong></p>
+      <ul>
+        <li>
+          Identidad de tu cuenta de Google (nombre, correo y foto) a través de
+          <strong>Firebase Authentication</strong> para iniciar sesión.
+        </li>
+      </ul>
+
+      <p><strong>Datos del niño o niña (ingresados por ti como madre, padre o cuidador):</strong></p>
+      <ul>
+        <li>Nombre, fecha de nacimiento, sexo y grupo sanguíneo.</li>
+        <li>Mediciones de crecimiento (peso, talla, perímetro cefálico).</li>
+        <li>Calendario y registro de vacunas (PNI).</li>
+        <li>
+          Controles médicos, medicamentos, hitos del desarrollo y diario (sueño,
+          alimentación, pañales, ánimo).
+        </li>
+        <li>Fotografías que decidas subir.</li>
+      </ul>
+
+      <p><strong>Datos técnicos:</strong></p>
+      <ul>
+        <li>Token de dispositivo para notificaciones push (Firebase Cloud Messaging).</li>
+        <li>Registros básicos de uso y seguridad del servidor.</li>
+      </ul>
+
+      <blockquote>
+        Los datos de salud y los datos de menores son <strong>categorías sensibles</strong>.
+        Solo los tratamos para prestarte el servicio y nunca los vendemos.
+      </blockquote>
+
+      <h2>3. Con qué finalidad y base de licitud</h2>
+      <p>
+        Tratamos los datos para: (a) prestarte las funciones de la App; (b) calcular
+        percentiles de crecimiento según los estándares de la OMS; (c) enviarte
+        recordatorios de vacunas y controles; (d) ofrecerte, si lo activas, un asistente
+        informativo con inteligencia artificial. La base de licitud es tu
+        <strong>consentimiento</strong> y la ejecución del servicio que solicitas. Puedes
+        retirar el consentimiento en cualquier momento eliminando tu cuenta.
+      </p>
+
+      <h2>4. Encargados y terceros que nos prestan servicios</h2>
+      <p>
+        Compartimos datos únicamente con proveedores que los procesan por cuenta nuestra
+        o que tú decides consultar:
+      </p>
+      <ul>
+        <li><strong>Google Firebase</strong> (autenticación y notificaciones push).</li>
+        <li>
+          <strong>Amazon Web Services (S3)</strong> — almacenamiento privado de las fotos,
+          en la región [región, p. ej. sa-east-1].
+        </li>
+        <li><strong>MongoDB Atlas</strong> — base de datos.</li>
+        <li>
+          <strong>Proveedor de IA</strong> [p. ej. OpenAI], solo si usas el asistente: se
+          envía el texto de tu consulta y la edad del niño, sin identificarte.
+          <em>(Activo solo si configuras esta función.)</em>
+        </li>
+        <li>
+          Fuentes de información que tú consultas dentro de la App:
+          <strong>MedlinePlus</strong> (NIH), <strong>CPSC</strong> (alertas de productos),
+          <strong>GNews/medios</strong> y, si la conectas, <strong>Mercado Libre</strong>.
+        </li>
+      </ul>
+      <p>No vendemos ni cedemos tus datos con fines publicitarios.</p>
+
+      <h2>5. Transferencias internacionales</h2>
+      <p>
+        Algunos proveedores (Google, AWS, MongoDB Atlas, el proveedor de IA) pueden
+        procesar datos fuera de Chile. Seleccionamos proveedores que ofrecen garantías
+        adecuadas de seguridad y cumplimiento.
+      </p>
+
+      <h2>6. Conservación</h2>
+      <p>
+        Conservamos tus datos mientras tu cuenta esté activa. Cuando eliminas tu cuenta
+        desde la App, borramos tus perfiles infantiles, mediciones, vacunas, controles,
+        medicamentos, hitos, diario, fotos y datos de cuenta asociados.
+      </p>
+
+      <h2>7. Tus derechos</h2>
+      <p>
+        Tienes derecho a <strong>acceder, rectificar, eliminar</strong> y
+        <strong>oponerte</strong> al tratamiento de tus datos, así como a la
+        <strong>portabilidad</strong> cuando aplique. Puedes:
+      </p>
+      <ul>
+        <li>Editar o eliminar registros directamente en la App.</li>
+        <li>Eliminar toda tu información con la opción <strong>"Eliminar cuenta y datos"</strong>.</li>
+        <li>
+          Escribirnos a [correo] para ejercer cualquier derecho. Responderemos en los
+          plazos legales aplicables.
+        </li>
+      </ul>
+
+      <h2>8. Seguridad</h2>
+      <p>
+        Aplicamos medidas como cifrado en tránsito (HTTPS), almacenamiento privado de
+        fotos con URLs firmadas de corta duración, autenticación basada en tokens y
+        acceso restringido a la base de datos. Ningún sistema es 100% infalible, pero
+        trabajamos para proteger tu información.
+      </p>
+
+      <h2>9. Menores de edad</h2>
+      <p>
+        La App está dirigida a <strong>madres, padres y cuidadores adultos</strong> que
+        registran la información de niños y niñas bajo su cuidado. No está destinada a ser
+        usada por menores de edad de forma autónoma. Al ingresar datos de un menor,
+        declaras tener la facultad legal para hacerlo.
+      </p>
+
+      <h2>10. Notificaciones push</h2>
+      <p>
+        Si las autorizas, enviamos recordatorios de vacunas y controles a tu dispositivo.
+        Puedes desactivarlas en los ajustes del sistema operativo en cualquier momento.
+      </p>
+
+      <h2>11. El asistente con IA no es consejo médico</h2>
+      <p>
+        El asistente y los consejos de desarrollo son <strong>informativos</strong> y no
+        reemplazan la consulta con tu pediatra o profesional de salud. Ante una urgencia,
+        acude a un servicio de salud.
+      </p>
+
+      <h2>12. Cambios a esta Política</h2>
+      <p>
+        Podemos actualizar esta Política. Publicaremos la versión vigente en la App e
+        indicaremos la fecha de última actualización.
+      </p>
+
+      <h2>13. Contacto</h2>
+      <p>Para consultas sobre privacidad: <strong>[correo]</strong>.</p>
+    </article>
+  </div>
+</div>

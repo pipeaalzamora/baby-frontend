@@ -40,7 +40,16 @@
         }
         <div class="user-info">
           <span class="user-name">{{ auth.user()!.name }}</span>
-          <span class="user-role">Padre / Madre</span>
+          @if (billing.premium()) {
+            <span class="premium-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7l4 5 5-7 5 7 4-5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+              </svg>
+              Premium
+            </span>
+          } @else {
+            <span class="user-role">Padre / Madre</span>
+          }
         </div>
       </div>
     }
@@ -151,6 +160,25 @@
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
                 </svg>
               }
+              @case ('users') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              }
+              @case ('chat') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <path d="M8 9h8M8 13h5"/>
+                </svg>
+              }
+              @case ('crown') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7l4 5 5-7 5 7 4-5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                </svg>
+              }
             }
           </span>
           <span class="nav-label">{{ item.label }}</span>
@@ -183,6 +211,9 @@
         </svg>
         <span>Cerrar sesión</span>
       </button>
+      <a routerLink="/privacy" class="privacy-link" (click)="closeSidebar()">
+        Política de privacidad
+      </a>
     </div>
   </aside>
 
@@ -222,4 +253,23 @@
       <router-outlet/>
     </main>
   </div>
+
+  <!-- Toasts globales -->
+  @if (toast.toasts().length > 0) {
+    <div class="toast-stack" aria-live="polite">
+      @for (t of toast.toasts(); track t.id) {
+        <div class="toast-item" [class.toast-item--success]="t.type === 'success'"
+             [class.toast-item--error]="t.type === 'error'"
+             [class.toast-item--info]="t.type === 'info'"
+             role="status">
+          <span class="toast-item__msg">{{ t.message }}</span>
+          <button class="toast-item__close" (click)="toast.dismiss(t.id)" aria-label="Cerrar aviso">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  }
 </div>

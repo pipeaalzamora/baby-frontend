@@ -1,0 +1,107 @@
+<div class="assistant-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          <path d="M8 9h8M8 13h5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="page-title">Asistente de crianza</h1>
+        <p class="page-subtitle">Resuelve dudas sobre el cuidado de tu bebé</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aviso IA deshabilitada -->
+  @if (aiNotice()) {
+    <div class="toast toast--notice" role="alert">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      {{ aiNotice() }}
+    </div>
+  }
+
+  <!-- Aviso límite diario gratuito (premium) -->
+  @if (premiumNotice()) {
+    <div class="toast toast--premium" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7l4 5 5-7 5 7 4-5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+      </svg>
+      <span class="premium-msg">
+        {{ premiumNotice() }}
+        <a routerLink="/premium" class="premium-link">Hazte premium</a>
+      </span>
+    </div>
+  }
+
+  <!-- Chat -->
+  <div class="chat-card">
+    <div class="chat-messages">
+      @if (messages().length === 0) {
+        <div class="chat-empty">
+          <div class="empty-orb">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" fill="rgba(14,165,233,0.1)" stroke="rgba(14,165,233,0.3)" stroke-width="1.5"/>
+              <path d="M44 30a2 2 0 0 1-2 2H26l-6 6V24a2 2 0 0 1 2-2h20a2 2 0 0 1 2 2z" stroke="#0ea5e9" stroke-width="2.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p>Escribe tu pregunta sobre alimentación, sueño, desarrollo y más.</p>
+        </div>
+      }
+
+      @for (m of messages(); track $index) {
+        <div class="bubble-row" [class.bubble-row--user]="m.role === 'user'">
+          <div class="bubble" [class.bubble--user]="m.role === 'user'" [class.bubble--assistant]="m.role === 'assistant'">
+            {{ m.content }}
+          </div>
+        </div>
+      }
+
+      @if (sending()) {
+        <div class="bubble-row">
+          <div class="bubble bubble--assistant bubble--typing">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+
+      <div #scrollAnchor></div>
+    </div>
+
+    @if (error()) {
+      <div class="toast toast--error">{{ error() }}</div>
+    }
+
+    <!-- Input -->
+    <div class="chat-input">
+      <textarea
+        class="chat-textarea"
+        rows="1"
+        placeholder="Escribe tu mensaje..."
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+        (keydown.enter)="onEnter($event)"
+        [disabled]="sending()"></textarea>
+      <button class="btn-send" (click)="send()" type="button" [disabled]="sending() || !draft().trim()" aria-label="Enviar">
+        @if (sending()) {
+          <span class="spinner-sm"></span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  @if (disclaimer()) {
+    <p class="disclaimer">{{ disclaimer() }}</p>
+  }
+</div>
