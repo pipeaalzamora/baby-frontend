@@ -1,59 +1,36 @@
-# BabyWeb
+# 👶 Baby Frontend — Infant Care Management Platform
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.25.
+[![Stack](https://img.shields.io/badge/Stack-TypeScript%20%7C%20React%20%7C%20Next.js%20%7C%20Tailwind-blue?style=flat-square)]()
+[![Status](https://img.shields.io/badge/Status-Activo%20%7C%20Producci%C3%B3n-green?style=flat-square)]()
 
-## Development server
+## 📌 Descripción del Proyecto
 
-To start a local development server, run:
+**Baby Frontend** es la interfaz web moderna y responsiva desarrollada para la plataforma de seguimiento y cuidado infantil. Permite a padres y cuidadores registrar rutinas diarias (alimentación, sueño, pañales, citas médicas) y visualizar métricas de desarrollo en tiempo real con una experiencia de usuario limpia, fluida y libre de distracciones.
 
-```bash
-ng serve
-```
+### 🎯 Problema que resuelve
+* **Registro Sin Fricción:** Optimiza la captura de datos cotidianos del bebé mediante interfaces rápidas e intuitivas diseñadas para uso móvil y de escritorio.
+* **Visualización Clara de Rutinas:** Centraliza el historial y las tendencias de cuidado para facilitar el seguimiento diario y la toma de decisiones.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🏗️ Arquitectura y Tecnologías
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 🛠️ Tech Stack:
+* **Frontend:** React, Next.js (App Router), TypeScript, Tailwind CSS[cite: 2, 3].
+* **Gestión de Estado & API:** Custom Hooks, Context API / Zustand y consumo optimizado de APIs REST mediante clientes HTTP robustos.
+* **Despliegue & Hosting:** AWS Amplify / Vercel con integración continua (CI/CD) vinculada al repositorio de GitHub[cite: 2, 3].
 
-```bash
-ng generate component component-name
-```
+### 🧱 Características Técnicas Destacadas:
+* **Arquitectura Component-Driven:** Desarrollo modular con componentes altamente reutilizables y tipados estrictamente con TypeScript[cite: 2, 3].
+* **Diseño Responsivo (Mobile-First):** Layout adaptado al 100% para ofrecer una experiencia fluida tanto en teléfonos inteligentes como en tablets o pantallas grandes.
+* **Optimización de Rendimiento:** Tiempos de carga mínimos gracias al renderizado híbrido de Next.js y la gestión eficiente del ciclo de vida del cliente[cite: 2, 3].
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## 📸 Demo / Capturas de Pantalla
 
-## Building
+| Dashboard Principal | Módulo de Registro y Rutinas |
+| :---: | :---: |
+| ![Dashboard](https://via.placeholder.com/600x350.png?text=Baby+Dashboard+View) | ![Activities](https://via.placeholder.com/600x350.png?text=Baby+Activities+View) |
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
